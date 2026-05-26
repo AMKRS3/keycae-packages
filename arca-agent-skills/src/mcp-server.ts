@@ -8,7 +8,7 @@ import { KeyCaeClient } from 'keycae-ts';
 
 // Initialize the KeyCAE API Client
 // Note: In runtime, the API key can be fetched from the environment variable KEYCAE_API_KEY
-const apiKey = process.env.KEYCAE_API_KEY || 'sk_test_public_sandbox_cuit_20304050607';
+const apiKey = process.env.KEYCAE_API_KEY || 'sk_test_public_sandbox_cuit_20254459306';
 const baseUrl = process.env.KEYCAE_API_URL || 'http://localhost:3000';
 const client = new KeyCaeClient(apiKey, baseUrl);
 
