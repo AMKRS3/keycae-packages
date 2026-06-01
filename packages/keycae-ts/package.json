@@ -1,0 +1,31 @@
+{
+  "name": "keycae-ts",
+  "version": "1.0.0",
+  "description": "Official TypeScript & JavaScript SDK client for KeyCAE.ar impositive compliance API (ARCA)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "arca",
+    "afip",
+    "factura-electronica",
+    "compliance",
+    "sdk",
+    "client",
+    "keycae",
+    "argentina"
+  ],
+  "author": "KeyCAE Community",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.9"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "@types/node-fetch": "^2.6.3",
+    "typescript": "^5.0.4"
+  }
+}
