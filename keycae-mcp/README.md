@@ -79,6 +79,8 @@ Add to `.cursor/mcp.json` in your project:
 | `lookup_taxpayer` | Look up taxpayer by CUIT |
 | `get_billing_status` | Check billing plan and usage |
 | `keycae_health` | Health check |
+| `list_puntos_de_venta` | List available points of sale |
+| `check_emission_capability` | Check what invoice types a CUIT can emit |
 
 ## 💡 Example Usage
 
