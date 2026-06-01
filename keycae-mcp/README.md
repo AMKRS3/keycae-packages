@@ -1,20 +1,24 @@
-# keycae-mcp
+# keycae-mcp 🔌
 
-MCP Server for [KeyCAE](https://keycae.ar) — Argentine electronic invoicing (factura electrónica) with ARCA/AFIP.
+[![npm version](https://img.shields.io/npm/v/keycae-mcp.svg)](https://www.npmjs.com/package/keycae-mcp)
+[![npm downloads](https://img.shields.io/npm/dm/keycae-mcp.svg)](https://www.npmjs.com/package/keycae-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+MCP Server for [KeyCAE.ar](https://keycae.ar) — **Argentine electronic invoicing** (facturación electrónica) with ARCA/AFIP.
 
 Let AI agents emit invoices, manage credentials, and handle delegations directly.
 
-## Quick Start
+## ⚡ Quick Start
 
 ```bash
-# Set your API key (get one at https://keycae.ar/dashboard)
-export KEYCAE_API_KEY="sk_live_..."
-
-# Run the MCP server (stdio mode for Claude, Cursor, etc.)
 npx keycae-mcp
 ```
 
-## Claude Desktop Configuration
+That's it. Your AI agent now has 10 tools for Argentine invoicing.
+
+## 🔧 Configuration
+
+### Claude Desktop
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
@@ -32,7 +36,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-## Cursor / Windsurf Configuration
+### Cursor / Windsurf
 
 Add to `.cursor/mcp.json` in your project:
 
@@ -50,11 +54,11 @@ Add to `.cursor/mcp.json` in your project:
 }
 ```
 
-## Available Tools
+## 🛠️ Available Tools
 
 | Tool | Description |
 |------|-------------|
-| `emit_invoice` | Emit an Argentine electronic invoice (factura electrónica) |
+| `emit_invoice` | Emit an Argentine electronic invoice (A, B, C, M, E) |
 | `get_invoice` | Get details of a previously emitted invoice |
 | `list_invoices` | List recent invoices |
 | `list_credentials` | List digital certificates for the CUIT |
@@ -65,7 +69,7 @@ Add to `.cursor/mcp.json` in your project:
 | `get_billing_status` | Check billing plan and usage |
 | `keycae_health` | Health check |
 
-## Example Usage
+## 💡 Example Usage
 
 ### Emit a Factura B
 
@@ -73,7 +77,7 @@ Add to `.cursor/mcp.json` in your project:
 User: Emití una factura B al CUIT 20333444555 por $15.000 ARS por "Servicios de consulting"
 ```
 
-Agent calls `emit_invoice` with:
+Agent calls `emit_invoice`:
 ```json
 {
   "cuit_emisor": "20254459306",
@@ -92,20 +96,29 @@ User: ¿Puedo facturar con el CUIT 20254459306?
 
 Agent calls `check_delegation` → confirms delegation is active, then `list_credentials` → confirms certificate is valid.
 
-## Invoice Types
+## 📋 Invoice Types
 
 | Type | Description | When to use |
 |------|-------------|-------------|
 | **A** | IVA discriminado | RI → RI |
-| **B** | IVA incluido | RI → CF |
+| **B** | IVA incluido | RI → Consumidor Final |
 | **C** | Exento | No genera IVA |
 | **M** | Monotributo | Monotributo emitter |
 | **E** | Exportación | International clients |
 
-## Resources
+## 🔗 Links
 
-The server also provides a `keycae://docs` resource with documentation that AI agents can read for context.
+- 🌐 [keycae.ar](https://keycae.ar) — API & Dashboard
+- 📖 [docs.keycae.ar](https://docs.keycae.ar) — Documentation
+- 📄 [llms.txt](https://keycae.ar/llms.txt) — AI Agent Reference
+- 🔌 [mcp.so](https://mcp.so/server/keycae-mcp/AMKR) — MCP Directory
+- 🤖 [glama.ai](https://glama.ai/mcp/servers) — Glama Directory
 
-## License
+## 📦 Related Packages
+
+- [`keycae-ts`](https://www.npmjs.com/package/keycae-ts) — TypeScript SDK
+- [`keycae-cli`](https://www.npmjs.com/package/keycae-cli) — CLI tool
+
+## 📄 License
 
 MIT
