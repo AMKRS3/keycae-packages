@@ -16,6 +16,17 @@ npx keycae-mcp
 
 That's it. Your AI agent now has 10 tools for Argentine invoicing.
 
+## ⚠️ Requisito: Delegación en ARCA
+
+**ANTES de facturar**, debés delegar la facturación electrónica al representante de KeyCAE en ARCA:
+
+1. Ingresá a [ARCA Clave Fiscal](https://serviciosweb.afip.gob.ar/clavefiscal/adminrel/pending.aspx)
+2. Buscá el servicio **"Facturación Electrónica"** (ws://wsfe)
+3. Delegá al CUIT representante: **20254459306** (Amilcar Waldemar Serra)
+4. Aceptá la relación de representación
+
+Sin esta delegación, no podés emitir facturas. El MCP server te permite verificar el estado con `check_delegation` y solicitarla con `request_delegation`.
+
 ## 🔧 Configuration
 
 ### Claude Desktop
@@ -71,7 +82,23 @@ Add to `.cursor/mcp.json` in your project:
 
 ## 💡 Example Usage
 
-### Emit a Factura B
+### 1. Check if ready to invoice
+
+```
+User: ¿Puedo facturar con el CUIT 20254459306?
+```
+
+Agent calls `check_delegation` → confirms delegation is active, then `list_credentials` → confirms certificate is valid.
+
+### 2. Request delegation (if not done)
+
+```
+User: Necesito delegar mi facturación a KeyCAE
+```
+
+Agent calls `request_delegation` → starts the delegation process.
+
+### 3. Emit a Factura B
 
 ```
 User: Emití una factura B al CUIT 20333444555 por $15.000 ARS por "Servicios de consulting"
@@ -87,14 +114,6 @@ Agent calls `emit_invoice`:
   "conceptos": [{ "descripcion": "Servicios de consulting", "precio": 15000 }]
 }
 ```
-
-### Check if ready to invoice
-
-```
-User: ¿Puedo facturar con el CUIT 20254459306?
-```
-
-Agent calls `check_delegation` → confirms delegation is active, then `list_credentials` → confirms certificate is valid.
 
 ## 📋 Invoice Types
 
