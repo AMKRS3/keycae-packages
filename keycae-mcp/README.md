@@ -16,6 +16,25 @@ npx keycae-mcp
 
 That's it. Your AI agent now has **12 tools** for Argentine invoicing.
 
+## ☁️ Remote MCP Server (no installation required)
+
+KeyCAE also exposes a **Streamable HTTP MCP server** — no `npx`, no local setup.
+
+**Endpoint:** `https://keycae.ar/v1/mcp`
+
+```json
+{
+  "mcpServers": {
+    "keycae-remote": {
+      "url": "https://keycae.ar/v1/mcp",
+      "headers": {
+        "Authorization": "Bearer sk_live_..."
+      }
+    }
+  }
+}
+```
+
 ## ⚠️ Requisito: Delegación en ARCA
 
 **ANTES de facturar**, debés delegar la facturación electrónica al representante de KeyCAE en ARCA:
