@@ -66,11 +66,11 @@ const server = new McpServer({
 // 1. EMIT INVOICE ────────────────────────────────────────────────────
 server.tool(
   "emit_invoice",
-  "Emit an Argentine electronic invoice (factura electrónica) via ARCA/AFIP. Returns CAE, PDF URL, and QR code.",
+  "Emit an Argentine electronic invoice (factura electrónica) via ARCA/AFIP. Returns CAE, PDF URL, and QR code. Supports 24 invoice types including FCE MiPyMEs, tributos, foreign currency.",
   {
     cuit_emisor: z.string().describe("CUIT of the invoice issuer (11 digits)"),
     punto_de_venta: z.number().describe("Point of sale number (punto de venta)"),
-    tipo_comprobante: z.enum(["A", "B", "C", "M", "E", "NCA", "NCB", "NCC", "NCE", "NCM", "NDA", "NDB", "NDC", "NDE", "NDM"]).describe("Invoice type: A (IVA discriminado), B (consumidor final), C (exento), M (monotributo), E (exportación), NCA/NCB/NCC/NCE/NCM (nota de crédito), NDA/NDB/NDC/NDE/NDM (nota de débito)"),
+    tipo_comprobante: z.enum(["A", "B", "C", "M", "E", "NCA", "NCB", "NCC", "NCE", "NCM", "NDA", "NDB", "NDC", "NDE", "NDM", "FCE_A", "FCE_B", "FCE_C", "FCE_NDA", "FCE_NDB", "FCE_NDC", "FCE_NCA", "FCE_NCB", "FCE_NCC"]).describe("Invoice type: A/B/C/M/E + NC (5) + ND (5) + FCE MiPyMEs (9)"),
     receptor: z.object({
       tipo_doc: z.enum(["CUIT", "CUIL", "DNI", "PASAPORTE", "SIN_IDENTIFICAR"]),
       nro_doc: z.string().describe("Document number"),
@@ -81,10 +81,26 @@ server.tool(
       descripcion: z.string().describe("Item description"),
       precio: z.number().describe("Unit price in ARS"),
       cantidad: z.number().optional().default(1),
-      alicuota_iva: z.number().optional().default(21).describe("IVA rate: 21, 10.5, 27, 0, etc.")
+      alicuota_iva: z.number().optional().default(21).describe("IVA rate: 21, 10.5, 27, 5, 2, 0")
     })).describe("Line items"),
-    moneda: z.string().optional().default("PES").describe("Currency code (PES for ARS)"),
-    fecha_servicio: z.string().optional().describe("Service date (YYYY-MM-DD) for service invoices")
+    tributos: z.array(z.object({
+      id: z.number().describe("Tax code: 9=IIBB, 12=IIBB CABA, 13=IIBB BSAS, 14=IIBB Santa Fe, 5=Impuesto Interno, 1=Ganancias"),
+      descripcion: z.string(),
+      base_imponible: z.number(),
+      alicuota: z.number(),
+      importe: z.number()
+    })).optional().describe("Tax items (IIBB, Impuesto Interno, etc.)"),
+    moneda: z.string().optional().default("PES").describe("Currency: PES, DOL, EUR, BRL, UYU, GBP, etc."),
+    moneda_cotizacion: z.number().optional().describe("Exchange rate vs peso (required if moneda != PES)"),
+    fecha_comprobante: z.string().optional().describe("Invoice date (YYYYMMDD, default today)"),
+    fecha_servicio_desde: z.string().optional().describe("Service start date (YYYYMMDD, for services)"),
+    fecha_servicio_hasta: z.string().optional().describe("Service end date (YYYYMMDD, for services)"),
+    fecha_vto_pago: z.string().optional().describe("Payment due date (YYYYMMDD, for services)"),
+    condicion_iva_receptor: z.number().optional().describe("Receiver IVA condition code (1=RI, 5=CF, 6=Monotributo, 3=Exento). Get full table from get_condiciones_iva tool."),
+    opcionales: z.array(z.object({
+      id: z.string().describe("Optional data ID (see ARCA table)"),
+      valor: z.string()
+    })).optional().describe("Optional data fields"),
   },
   async (args) => {
     const result = await api("POST", "/v1/invoices", args);
@@ -340,6 +356,22 @@ server.tool(
   }
 );
 
+// 14. GET CONDICIONES IVA ──────────────────────────────────────────
+server.tool(
+  "get_condiciones_iva",
+  "Get the full table of 15 IVA conditions for invoice receivers (ARCA official codes). Use the code in condicion_iva_receptor when emitting invoices.",
+  {},
+  async () => {
+    const result = await api("GET", "/v1/taxpayers/condiciones-iva");
+    return {
+      content: [{
+        type: "text" as const,
+        text: JSON.stringify(result, null, 2)
+      }]
+    };
+  }
+);
+
 // ════════════════════════════════════════════════════════════════════
 //  RESOURCES (for agent context)
 // ════════════════════════════════════════════════════════════════════
@@ -364,18 +396,29 @@ server.resource(
 - **Factura C**: Exento (no genera IVA)
 - **Factura M**: Monotributo
 - **Factura E**: Exportación
+- **Notas de Crédito**: NCA, NCB, NCC, NCE, NCM
+- **Notas de Débito**: NDA, NDB, NDC, NDE, NDM
+- **FCE MiPyMEs**: FCE_A, FCE_B, FCE_C + NC/ND asociados
 
 ## Common Workflow
 1. check_delegation → Ensure CUIT is delegated
 2. list_credentials → Verify certificate is active
-3. emit_invoice → Issue the invoice
-4. get_invoice → Retrieve details
+3. check_emission_capability → Know what invoice types are valid
+4. get_condiciones_iva → Get receiver IVA condition code
+5. emit_invoice → Issue the invoice (24 types, tributos, foreign currency)
+6. get_invoice → Retrieve details
 
 ## ARCA/AFIP Notes
 - CUIT must delegate electronic invoicing to KeyCAE's representative CUIT
 - Delegation is automatic if Hermes is enabled
 - Certificates must be renewed annually
 - Punto de venta must be registered for electronic invoicing
+- Error 10016 (duplicated) is handled automatically — CAE is recovered
+
+## B2B2C (Platform Plan)
+- POST /v1/api-keys → Create sub-accounts programmatically
+- Webhooks: POST /v1/webhooks/config to receive invoice events
+- Rate limit: 100 req/min per API key
 
 ## Pricing
 - Free: 50 invoices/month

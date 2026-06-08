@@ -85,11 +85,11 @@ server.tool(
 // 4. EMITIR FACTURA
 server.tool(
   "emitir_factura",
-  "Emitir factura electrónica ante ARCA/AFIP. Retorna CAE, PDF y QR.",
+  "Emitir factura electrónica ante ARCA/AFIP. Retorna CAE, PDF y QR. Soporta 24 tipos incluyendo FCE MiPyMEs, tributos y moneda extranjera.",
   {
     cuit_emisor: z.string().describe("CUIT emisor (11 dígitos)"),
     punto_de_venta: z.number().describe("Punto de venta"),
-    tipo_comprobante: z.enum(["A", "B", "C", "M", "E", "NCA", "NCB", "NCC", "NCE", "NCM", "NDA", "NDB", "NDC", "NDE", "NDM"]).describe("Tipo: A (IVA discriminado), B (consumidor final), C (exento), M (monotributo), E (exportación), NCA/NCB/NCC/NCE/NCM (nota de crédito), NDA/NDB/NDC/NDE/NDM (nota de débito)"),
+    tipo_comprobante: z.enum(["A", "B", "C", "M", "E", "NCA", "NCB", "NCC", "NCE", "NCM", "NDA", "NDB", "NDC", "NDE", "NDM", "FCE_A", "FCE_B", "FCE_C", "FCE_NDA", "FCE_NDB", "FCE_NDC", "FCE_NCA", "FCE_NCB", "FCE_NCC"]).describe("Tipo: A/B/C/M/E + NC (5) + ND (5) + FCE MiPyMEs (9)"),
     receptor: z.object({
       tipo_doc: z.enum(["CUIT", "CUIL", "DNI", "PASAPORTE", "SIN_IDENTIFICAR"]),
       nro_doc: z.string(),
@@ -102,8 +102,24 @@ server.tool(
       cantidad: z.number().optional().default(1),
       alicuota_iva: z.number().optional().default(21)
     })),
-    moneda: z.string().optional().default("PES"),
-    fecha_servicio: z.string().optional().describe("Fecha del servicio (YYYY-MM-DD)")
+    tributos: z.array(z.object({
+      id: z.number().describe("Código: 9=IIBB, 12=IIBB CABA, 13=IIBB BSAS, 14=IIBB Santa Fe, 5=Imp. Interno, 1=Ganancias"),
+      descripcion: z.string(),
+      base_imponible: z.number(),
+      alicuota: z.number(),
+      importe: z.number()
+    })).optional().describe("Tributos (IIBB, Impuesto Interno, etc.)"),
+    moneda: z.string().optional().default("PES").describe("Moneda: PES, DOL, EUR, BRL, etc."),
+    moneda_cotizacion: z.number().optional().describe("Cotización vs peso (requerida si moneda != PES)"),
+    fecha_comprobante: z.string().optional().describe("Fecha comprobante (YYYYMMDD)"),
+    fecha_servicio_desde: z.string().optional(),
+    fecha_servicio_hasta: z.string().optional(),
+    fecha_vto_pago: z.string().optional(),
+    condicion_iva_receptor: z.number().optional().describe("Código condición IVA receptor (1=RI, 5=CF, 6=Mono, 3=Exento)"),
+    opcionales: z.array(z.object({
+      id: z.string(),
+      valor: z.string()
+    })).optional()
   },
   async (args) => {
     const result = await api("POST", "/v1/invoices", args);

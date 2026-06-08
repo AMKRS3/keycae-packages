@@ -14,7 +14,7 @@ Let AI agents emit invoices, manage credentials, handle delegations, and more �
 npx keycae-mcp
 ```
 
-That's it. Your AI agent now has **12 tools** for Argentine invoicing.
+That's it. Your AI agent now has **14 tools** for Argentine invoicing.
 
 ## ☁️ Remote MCP Server (no installation required)
 
@@ -88,7 +88,7 @@ Add to `.cursor/mcp.json` in your project:
 
 | Tool | Description |
 |------|-------------|
-| `emit_invoice` | Emitir factura electrónica (A, B, C, M, E + 5 NC + 5 ND) |
+| `emit_invoice` | Emitir factura (24 tipos: A/B/C/M/E + 5 NC + 5 ND + 9 FCE MiPyMEs) |
 | `get_invoice` | Consultar factura por ID |
 | `list_invoices` | Listar facturas recientes |
 | `list_credentials` | Listar certificados digitales |
@@ -97,6 +97,7 @@ Add to `.cursor/mcp.json` in your project:
 | `request_delegation` | Solicitar delegación ARCA |
 | `lookup_taxpayer` | Buscar contribuyente por CUIT |
 | `check_emission_capability` | Verificar qué tipos de factura puede emitir un CUIT |
+| `get_condiciones_iva` | Tabla de 15 condiciones IVA del receptor (códigos oficiales ARCA) |
 | `get_billing_status` | Estado del plan y consumo |
 | `list_puntos_de_venta` | Listar puntos de venta habilitados |
 | `keycae_health` | Health check de la API |

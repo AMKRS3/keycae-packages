@@ -194,5 +194,19 @@ class KeyCaeClient {
     async health() {
         return this.request('GET', '/health');
     }
+    // ── Condición IVA Receptor ──────────────────────────────────────
+    /**
+     * Obtener tabla de condiciones IVA del receptor (15 códigos oficiales ARCA)
+     */
+    async getCondicionesIva() {
+        return this.request('GET', '/v1/taxpayers/condiciones-iva');
+    }
+    // ── Cotización de Moneda ────────────────────────────────────────
+    /**
+     * Consultar cotización de una moneda extranjera vs peso (vía ARCA)
+     */
+    async getCotizacionMoneda(moneda) {
+        return this.request('GET', `/v1/cotizacion/${moneda}`);
+    }
 }
 exports.KeyCaeClient = KeyCaeClient;

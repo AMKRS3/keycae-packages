@@ -37,16 +37,43 @@ export interface InvoiceItem {
   alicuota_iva?: number;
 }
 
+export interface Tributo {
+  id: number;
+  descripcion: string;
+  base_imponible: number;
+  alicuota: number;
+  importe: number;
+}
+
+export interface Opcional {
+  id: string;
+  valor: string;
+}
+
+export interface CondicionesIvaResponse {
+  condiciones: { codigo: number; nombre: string }[];
+}
+
 export interface InvoiceInput {
   cuit_emisor: string;
   punto_de_venta: number;
   tipo_comprobante: 'A' | 'B' | 'C' | 'M' | 'E'
     | 'NCA' | 'NCB' | 'NCC' | 'NCE' | 'NCM'
-    | 'NDA' | 'NDB' | 'NDC' | 'NDE' | 'NDM';
+    | 'NDA' | 'NDB' | 'NDC' | 'NDE' | 'NDM'
+    | 'FCE_A' | 'FCE_B' | 'FCE_C'
+    | 'FCE_NDA' | 'FCE_NDB' | 'FCE_NDC'
+    | 'FCE_NCA' | 'FCE_NCB' | 'FCE_NCC';
   receptor: InvoiceReceptor;
   conceptos: InvoiceItem[];
+  tributos?: Tributo[];
   moneda?: string;
-  fecha_servicio?: string;
+  moneda_cotizacion?: number;
+  fecha_comprobante?: string;
+  fecha_servicio_desde?: string;
+  fecha_servicio_hasta?: string;
+  fecha_vto_pago?: string;
+  condicion_iva_receptor?: number;
+  opcionales?: Opcional[];
   brand_logo_url?: string;
   brand_color?: string;
 }
@@ -376,5 +403,23 @@ export class KeyCaeClient {
    */
   async health(): Promise<HealthResponse> {
     return this.request<HealthResponse>('GET', '/health');
+  }
+
+  // ── Condición IVA Receptor ──────────────────────────────────────
+
+  /**
+   * Obtener tabla de condiciones IVA del receptor (15 códigos oficiales ARCA)
+   */
+  async getCondicionesIva(): Promise<CondicionesIvaResponse> {
+    return this.request<CondicionesIvaResponse>('GET', '/v1/taxpayers/condiciones-iva');
+  }
+
+  // ── Cotización de Moneda ────────────────────────────────────────
+
+  /**
+   * Consultar cotización de una moneda extranjera vs peso (vía ARCA)
+   */
+  async getCotizacionMoneda(moneda: string): Promise<{ moneda: string; cotizacion: number }> {
+    return this.request<any>('GET', `/v1/cotizacion/${moneda}`);
   }
 }
