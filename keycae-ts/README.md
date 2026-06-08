@@ -128,6 +128,8 @@ await client.importCredential({
 | `C` | Exento (Monotributo / Exento) |
 | `M` | Monotributo |
 | `E` | Exportación |
+| `NCA` `NCB` `NCC` `NCE` `NCM` | Notas de Crédito (A, B, C, E, M) |
+| `NDA` `NDB` `NDC` `NDE` `NDM` | Notas de Débito (A, B, C, E, M) |
 
 ## Alertas Telegram
 

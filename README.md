@@ -46,7 +46,7 @@ npx keycae-mcp
 
 | Tool | Descripción |
 |------|-------------|
-| `emit_invoice` | Emitir factura electrónica (A, B, C, M, E) |
+| `emit_invoice` | Emitir factura electrónica (A, B, C, M, E + 5 NC + 5 ND) |
 | `get_invoice` | Consultar factura por ID |
 | `list_invoices` | Listar facturas recientes |
 | `list_credentials` | Ver certificados digitales |
