@@ -4,6 +4,13 @@ import fetch from 'node-fetch';
 //  INTERFACES
 // ════════════════════════════════════════════════════════════════════
 
+export interface DomicilioFiscal {
+  direccion: string | null;
+  localidad: string | null;
+  cod_postal: string | null;
+  provincia: string | null;
+}
+
 export interface TaxpayerResponse {
   cuit: string;
   nombre: string;
@@ -13,6 +20,7 @@ export interface TaxpayerResponse {
   estado: string;
   condicion_iva?: string;
   actividades?: string[];
+  domicilio_fiscal?: DomicilioFiscal;
 }
 
 export interface InvoiceReceptor {
@@ -32,7 +40,9 @@ export interface InvoiceItem {
 export interface InvoiceInput {
   cuit_emisor: string;
   punto_de_venta: number;
-  tipo_comprobante: 'A' | 'B' | 'C' | 'M' | 'E';
+  tipo_comprobante: 'A' | 'B' | 'C' | 'M' | 'E'
+    | 'NCA' | 'NCB' | 'NCC' | 'NCE' | 'NCM'
+    | 'NDA' | 'NDB' | 'NDC' | 'NDE' | 'NDM';
   receptor: InvoiceReceptor;
   conceptos: InvoiceItem[];
   moneda?: string;

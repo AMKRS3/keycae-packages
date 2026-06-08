@@ -89,7 +89,7 @@ server.tool(
   {
     cuit_emisor: z.string().describe("CUIT emisor (11 dígitos)"),
     punto_de_venta: z.number().describe("Punto de venta"),
-    tipo_comprobante: z.enum(["A", "B", "C", "M", "E"]).describe("Tipo: A (IVA discriminado), B (consumidor final), C (exento), M (monotributo), E (exportación)"),
+    tipo_comprobante: z.enum(["A", "B", "C", "M", "E", "NCA", "NCB", "NCC", "NCE", "NCM", "NDA", "NDB", "NDC", "NDE", "NDM"]).describe("Tipo: A (IVA discriminado), B (consumidor final), C (exento), M (monotributo), E (exportación), NCA/NCB/NCC/NCE/NCM (nota de crédito), NDA/NDB/NDC/NDE/NDM (nota de débito)"),
     receptor: z.object({
       tipo_doc: z.enum(["CUIT", "CUIL", "DNI", "PASAPORTE", "SIN_IDENTIFICAR"]),
       nro_doc: z.string(),
