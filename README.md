@@ -10,11 +10,11 @@ Diseñado para developers humanos y **agentes autónomos de IA** (Cursor, Windsu
 
 | Paquete | Directorio | Descripción | npm |
 |---------|------------|-------------|-----|
-| **`keycae-ts`** | [`/keycae-ts`](./keycae-ts) | SDK oficial TypeScript/JavaScript | [![npm](https://img.shields.io/npm/v/keycae-ts)](https://www.npmjs.com/package/keycae-ts) |
-| **`keycae-mcp`** | [`/keycae-mcp`](./keycae-mcp) | MCP Server para AI agents | [![npm](https://img.shields.io/npm/v/keycae-mcp)](https://www.npmjs.com/package/keycae-mcp) |
-| **`keycae-cli`** | [`/keycae-cli`](./keycae-cli) | CLI interactiva de terminal | [![npm](https://img.shields.io/npm/v/keycae-cli)](https://www.npmjs.com/package/keycae-cli) |
-| **`arca-agent-skills`** | [`/arca-agent-skills`](./arca-agent-skills) | System prompts para agentes IA | — |
-| **`vibe-invoice-inbox`** | [`/vibe-invoice-inbox`](./vibe-invoice-inbox) | Dashboard web de facturas | — |
+| **`keycae-ts`** | [`/keycae-ts`](./keycae-ts) | SDK oficial TypeScript/JavaScript (16 métodos) | [![npm](https://img.shields.io/npm/v/keycae-ts)](https://www.npmjs.com/package/keycae-ts) |
+| **`keycae-mcp`** | [`/keycae-mcp`](./keycae-mcp) | MCP Server para AI agents (12 tools) | [![npm](https://img.shields.io/npm/v/keycae-mcp)](https://www.npmjs.com/package/keycae-mcp) |
+| **`keycae-cli`** | [`/keycae-cli`](./keycae-cli) | CLI interactiva de terminal (12 comandos) | [![npm](https://img.shields.io/npm/v/keycae-cli)](https://www.npmjs.com/package/keycae-cli) |
+| **`arca-agent-skills`** | [`/arca-agent-skills`](./arca-agent-skills) | MCP Server + System prompts para agentes IA (12 tools) | — |
+| **`vibe-invoice-inbox`** | [`/vibe-invoice-inbox`](./vibe-invoice-inbox) | Dashboard web de facturas (Next.js) | — |
 
 ---
 
@@ -26,7 +26,7 @@ Diseñado para developers humanos y **agentes autónomos de IA** (Cursor, Windsu
 npx keycae-mcp
 ```
 
-### Configuración en Claude Desktop
+### Configuración en Claude Desktop / Cursor / Windsurf
 
 ```json
 {
@@ -42,23 +42,7 @@ npx keycae-mcp
 }
 ```
 
-### Configuración en Cursor / Windsurf
-
-```json
-{
-  "mcpServers": {
-    "keycae": {
-      "command": "npx",
-      "args": ["-y", "keycae-mcp"],
-      "env": {
-        "KEYCAE_API_KEY": "sk_liv..._key"
-      }
-    }
-  }
-}
-```
-
-### Tools Disponibles
+### Tools Disponibles (12)
 
 | Tool | Descripción |
 |------|-------------|
@@ -70,7 +54,9 @@ npx keycae-mcp
 | `check_delegation` | Verificar delegación ARCA |
 | `request_delegation` | Solicitar delegación ARCA |
 | `lookup_taxpayer` | Buscar contribuyente por CUIT |
+| `check_emission_capability` | Verificar tipos de factura compatibles |
 | `get_billing_status` | Estado del plan y consumo |
+| `list_puntos_de_venta` | Listar puntos de venta habilitados |
 | `keycae_health` | Health check |
 
 ---
@@ -92,72 +78,68 @@ npm install keycae-ts
 ```typescript
 import { KeyCaeClient } from 'keycae-ts';
 
-const client = new KeyCaeClient('sk_tes...9306');
+const client = new KeyCaeClient('sk_liv..._key');
 
 // Consultar contribuyente
 const taxpayer = await client.getTaxpayer('20254459306');
 console.log(`${taxpayer.nombre} | ${taxpayer.estado}`);
 
+// Verificar compatibilidad de tipos de factura
+const cap = await client.checkEmissionCapability('20254459306');
+console.log(cap.recommendation);
+
 // Emitir factura
 const invoice = await client.emitInvoice({
   cuit_emisor: '20254459306',
   punto_de_venta: 1,
-  tipo_comprobante: 'B',
-  receptor: { tipo_doc: 'CUIT', nro_doc: '20333444555' },
+  tipo_comprobante: 'C',
+  receptor: { tipo_doc: 'DNI', nro_doc: '35123456' },
   conceptos: [{ descripcion: 'Servicios', precio: 15000 }]
-});
-console.log(`CAE: ${invoice.cae}`);
+}, 'order_123');
+
+console.log(`CAE: ${invoice.cae} | PDF: ${invoice.url_pdf}`);
 ```
 
 ### Opción 3: CLI
 
 ```bash
-npx keycae init sk_tes...9306
+npm install -g keycae-cli
+keycae init
+keycae invoice-emit
 ```
 
 ---
 
-## 🤖 Integración con Agentes de IA
+## 📖 Modelos de Conexión
 
-### Cursor / Windsurf / Claude Code
+### Modalidad A: Delegación Directa (Recomendada)
+Sin certificados, sin llaves privadas. En minutos facturás.
 
-1. Copia las reglas de [`/arca-agent-skills/SKILL.md`](./arca-agent-skills/SKILL.md)
-2. Pégalas en `.cursorrules` o la configuración de tu agente
-3. El agente sabrá cómo facturar automáticamente
+### Modalidad B: Bóvedas KMS
+Generación segura de claves RSA y CSR.
 
-### MCP Server
-
-El MCP server le da a tu agente 10 tools listos para usar. Sin setup, sin código.
-
----
-
-## 📊 Estado del Proyecto
-
-| Componente | Estado | Versión |
-|------------|--------|---------|
-| API Principal | ✅ Producción | keycae.ar |
-| SDK TypeScript | ✅ Publicado | keycae-ts@1.0.0 |
-| MCP Server | ✅ Publicado | keycae-mcp@1.0.1 |
-| CLI | ✅ Publicado | keycae-cli |
-| Telegram Alerts | ✅ Funcionando | — |
-| Hermes Integration | ✅ Activo | hermes.keycae.ar |
-| Documentación | ✅ Online | docs.keycae.ar |
+### Modalidad C: Importar Certificado
+Subida directa de certificados (.crt) y llaves (.key).
 
 ---
 
-## 🔗 Links
+## ⚠️ Requisito: Delegación en ARCA
 
-- 🌐 [keycae.ar](https://keycae.ar) — Sitio principal
-- 📖 [docs.keycae.ar](https://docs.keycae.ar) — Documentación
-- 📦 [npm: keycae-mcp](https://www.npmjs.com/package/keycae-mcp) — MCP Server
-- 📦 [npm: keycae-ts](https://www.npmjs.com/package/keycae-ts) — SDK TypeScript
-- 🔗 [GitHub: keycae-mcp](https://github.com/AMKRS3/keycae-mcp) — MCP Server repo
-- 🔌 [mcp.so](https://mcp.so/server/keycae-mcp/AMKR) — Directorio MCP
-- 🤖 [glama.ai](https://glama.ai/mcp/servers) — Directorio Glama
+Antes de facturar, debés delegar la facturación electrónica a KeyCAE en ARCA:
+
+1. Ingresá a [ARCA Clave Fiscal](https://serviciosweb.afip.gob.ar/clavefiscal/adminrel/pending.aspx)
+2. Buscá el servicio **"Facturación Electrónica"** (ws://wsfe)
+3. Delegá al CUIT: **20254459306** (Amilcar Waldemar Serra)
+
+---
+
+## 📖 Documentación
+
 - 📄 [llms.txt](https://keycae.ar/llms.txt) — Para AI agents
+- 🔌 [MCP Server](https://www.npmjs.com/package/keycae-mcp) — Para Cursor/Claude
+- 📘 [SDK TypeScript](https://www.npmjs.com/package/keycae-ts) — Para developers
+- 💻 [CLI](https://www.npmjs.com/package/keycae-cli) — Para terminal
 
----
-
-## 📄 Licencia
+## Licencia
 
 MIT

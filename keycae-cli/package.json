@@ -1,7 +1,7 @@
 {
   "name": "keycae-cli",
-  "version": "1.0.0",
-  "description": "Interactive command-line tool (CLI) for testing, initializing, and diagnosing compliance connections to ARCA via KeyCAE.ar",
+  "version": "1.1.0",
+  "description": "Interactive CLI for KeyCAE.ar — Argentine electronic invoicing with ARCA/AFIP",
   "main": "dist/cli.js",
   "bin": {
     "keycae": "./bin/keycae.js"
@@ -10,25 +10,18 @@
     "build": "tsc",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [
-    "cli",
-    "arca",
-    "afip",
-    "compliance",
-    "terminal",
-    "keycae"
-  ],
+  "keywords": ["cli", "arca", "afip", "factura-electronica", "compliance", "keycae", "argentina"],
   "author": "KeyCAE Community",
   "license": "MIT",
   "dependencies": {
-    "commander": "^10.0.0",
-    "inquirer": "^8.2.5",
+    "commander": "^12.0.0",
+    "inquirer": "^9.0.0",
     "node-fetch": "^2.6.9"
   },
   "devDependencies": {
-    "@types/inquirer": "^8.2.6",
-    "@types/node": "^18.15.11",
+    "@types/inquirer": "^9.0.0",
+    "@types/node": "^22.0.0",
     "@types/node-fetch": "^2.6.3",
-    "typescript": "^5.0.4"
+    "typescript": "^5.7.0"
   }
 }

@@ -6,7 +6,7 @@
 
 MCP Server for [KeyCAE.ar](https://keycae.ar) — **Argentine electronic invoicing** (facturación electrónica) with ARCA/AFIP.
 
-Let AI agents emit invoices, manage credentials, and handle delegations directly.
+Let AI agents emit invoices, manage credentials, handle delegations, and more — directly from Claude, Cursor, Windsurf, or any MCP-compatible client.
 
 ## ⚡ Quick Start
 
@@ -14,7 +14,7 @@ Let AI agents emit invoices, manage credentials, and handle delegations directly
 npx keycae-mcp
 ```
 
-That's it. Your AI agent now has 10 tools for Argentine invoicing.
+That's it. Your AI agent now has **12 tools** for Argentine invoicing.
 
 ## ⚠️ Requisito: Delegación en ARCA
 
@@ -65,81 +65,54 @@ Add to `.cursor/mcp.json` in your project:
 }
 ```
 
-## 🛠️ Available Tools
+## 🛠️ Available Tools (12)
 
 | Tool | Description |
 |------|-------------|
-| `emit_invoice` | Emit an Argentine electronic invoice (A, B, C, M, E) |
-| `get_invoice` | Get details of a previously emitted invoice |
-| `list_invoices` | List recent invoices |
-| `list_credentials` | List digital certificates for the CUIT |
-| `create_credential` | Generate RSA keypair + CSR for ARCA |
-| `check_delegation` | Check ARCA delegation status |
-| `request_delegation` | Request ARCA delegation for invoicing |
-| `lookup_taxpayer` | Look up taxpayer by CUIT |
-| `get_billing_status` | Check billing plan and usage |
-| `keycae_health` | Health check |
-| `list_puntos_de_venta` | List available points of sale |
-| `check_emission_capability` | Check what invoice types a CUIT can emit |
+| `emit_invoice` | Emitir factura electrónica (A, B, C, M, E) |
+| `get_invoice` | Consultar factura por ID |
+| `list_invoices` | Listar facturas recientes |
+| `list_credentials` | Listar certificados digitales |
+| `create_credential` | Generar RSA keypair + CSR para ARCA |
+| `check_delegation` | Verificar delegación ARCA |
+| `request_delegation` | Solicitar delegación ARCA |
+| `lookup_taxpayer` | Buscar contribuyente por CUIT |
+| `check_emission_capability` | Verificar qué tipos de factura puede emitir un CUIT |
+| `get_billing_status` | Estado del plan y consumo |
+| `list_puntos_de_venta` | Listar puntos de venta habilitados |
+| `keycae_health` | Health check de la API |
 
-## 💡 Example Usage
+## 📖 Resources
 
-### 1. Check if ready to invoice
+The server also exposes a `keycae://docs` resource with inline documentation covering invoice types, common workflows, and ARCA/AFIP notes.
 
-```
-User: ¿Puedo facturar con el CUIT 20254459306?
-```
-
-Agent calls `check_delegation` → confirms delegation is active, then `list_credentials` → confirms certificate is valid.
-
-### 2. Request delegation (if not done)
+## 🔄 Workflow Típico
 
 ```
-User: Necesito delegar mi facturación a KeyCAE
+1. check_delegation  → Verificar que el CUIT esté delegado
+2. list_credentials  → Verificar que el certificado esté activo
+3. check_emission_capability → Saber qué tipos de factura puede emitir
+4. emit_invoice      → Emitir la factura
+5. get_invoice       → Consultar detalles
 ```
 
-Agent calls `request_delegation` → starts the delegation process.
+## 📋 Tipos de Comprobante
 
-### 3. Emit a Factura B
-
-```
-User: Emití una factura B al CUIT 20333444555 por $15.000 ARS por "Servicios de consulting"
-```
-
-Agent calls `emit_invoice`:
-```json
-{
-  "cuit_emisor": "20254459306",
-  "punto_de_venta": 3,
-  "tipo_comprobante": "B",
-  "receptor": { "tipo_doc": "CUIT", "nro_doc": "20333444555" },
-  "conceptos": [{ "descripcion": "Servicios de consulting", "precio": 15000 }]
-}
-```
-
-## 📋 Invoice Types
-
-| Type | Description | When to use |
+| Tipo | Descripción | Quién emite |
 |------|-------------|-------------|
-| **A** | IVA discriminado | RI → RI |
+| **A** | IVA discriminado | Responsable Inscripto → RI |
 | **B** | IVA incluido | RI → Consumidor Final |
-| **C** | Exento | No genera IVA |
-| **M** | Monotributo | Monotributo emitter |
-| **E** | Exportación | International clients |
+| **C** | Exento (sin IVA) | Monotributo / Exento |
+| **M** | Monotributo | Monotributista |
+| **E** | Exportación | Exportadores |
 
-## 🔗 Links
+## Environment Variables
 
-- 🌐 [keycae.ar](https://keycae.ar) — API & Dashboard
-- 📖 [docs.keycae.ar](https://docs.keycae.ar) — Documentation
-- 📄 [llms.txt](https://keycae.ar/llms.txt) — AI Agent Reference
-- 🔌 [mcp.so](https://mcp.so/server/keycae-mcp/AMKR) — MCP Directory
-- 🤖 [glama.ai](https://glama.ai/mcp/servers) — Glama Directory
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `KEYCAE_API_KEY` | ✅ | — | Your KeyCAE API key |
+| `KEYCAE_API_URL` | ❌ | `https://keycae.ar` | API base URL |
 
-## 📦 Related Packages
-
-- [`keycae-ts`](https://www.npmjs.com/package/keycae-ts) — TypeScript SDK
-- [`keycae-cli`](https://www.npmjs.com/package/keycae-cli) — CLI tool
-
-## 📄 License
+## Licencia
 
 MIT

@@ -9,12 +9,13 @@ This specification guides AI Coding Agents (such as Cursor, Windsurf, or Claude 
 Paste this prompt into your `.cursorrules`, Windsurf rules, or agent configurations:
 
 ```text
-You are an expert Argentina tax compliance AI developer agent. Your job is to integrate electronic invoicing (ARCA/AFIP) using KeyCAE's official TypeScript SDK (`keycae-ts`).
+You are an expert Argentina tax compliance AI developer agent. Your job is to integrate electronic invoicing (ARCA/AFIP) using KeyCAE's official TypeScript SDK (`keycae-ts`) or MCP Server (`keycae-mcp`).
 
 ### 🔑 Critical Guidelines:
 
 1. **Leverage the Official SDK Class (`KeyCaeClient`)**:
    - Initialize using `new KeyCaeClient(apiKey, baseUrl)`.
+   - Default baseUrl is `https://keycae.ar`.
    - Never implement manual SOAP XML signatures or direct AFIP WSAA requests.
 
 2. **Idempotency is Mandatory**:
@@ -22,166 +23,105 @@ You are an expert Argentina tax compliance AI developer agent. Your job is to in
 
 3. **Handle Errors with AI-DX Auto-Sanation**:
    - KeyCAE returns programmatically friendly error structures containing an `ai_action_hint` field when actions are required (e.g., renewing certificates or validating a client's CUIT).
+
+4. **Verify Emission Capability Before Emitting**:
+   - Use `checkEmissionCapability(cuit)` to know what invoice types a CUIT can emit.
+   - Monotributo → only Factura C or M. Responsable Inscripto → Factura A or B.
+
+5. **Invoice Types**:
+   - A: IVA discriminado (RI → RI)
+   - B: IVA incluido (RI → Consumidor Final)
+   - C: Exento (Monotributo / Exento)
+   - M: Monotributo
+   - E: Exportación
+
+6. **Receptor Types**:
+   - `SIN_IDENTIFICAR` with `nro_doc: '0'` for Consumidor Final without document.
+   - Always include `razon_social` and `condicion_iva` when available.
 ```
 
 ---
 
 ## 🛠️ SDK Integration Cheat-Sheet
 
-Here is how you actually write type-safe integrations using the `keycae-ts` SDK:
-
 ### 1. Initializing the Client
 ```typescript
 import { KeyCaeClient } from 'keycae-ts';
 
 const client = new KeyCaeClient(
-  process.env.KEYCAE_API_KEY || 'sk_test_public_sandbox_cuit_20254459306',
-  process.env.KEYCAE_BASE_URL || 'https://api.keycae.ar'
+  process.env.KEYCAE_API_KEY || 'sk_test_...',
+  process.env.KEYCAE_BASE_URL || 'https://keycae.ar'
 );
 ```
 
 ### 2. Validating a Taxpayer CUIT
-Before emitting invoices or setting up tenants, fetch their official ARCA condition:
 ```typescript
 try {
   const taxpayer = await client.getTaxpayer('20254459306');
   console.log(`Razón Social: ${taxpayer.nombre}`);
-  console.log(`Es IVA Inscripto: ${taxpayer.es_iva_inscripto}`);
+  console.log(`Condición IVA: ${taxpayer.condicion_iva}`);
 } catch (error) {
   console.error("No se pudo consultar el CUIT:", error.message);
 }
 ```
 
-### 3. Emitting an Invoice with Idempotency
+### 3. Checking Emission Capability
 ```typescript
-import { InvoiceInput } from 'keycae-ts';
+const cap = await client.checkEmissionCapability('20254459306');
+console.log(`Tipos compatibles: ${cap.compatible_types.join(', ')}`);
+console.log(cap.recommendation);
+```
 
-const invoiceData: InvoiceInput = {
+### 4. Emitting an Invoice with Idempotency
+```typescript
+const invoiceData = {
   cuit_emisor: '20254459306',
   punto_de_venta: 1,
-  tipo_comprobante: 'C',
+  tipo_comprobante: 'C' as const,
   receptor: {
-    tipo_doc: 'DNI',
+    tipo_doc: 'DNI' as const,
     nro_doc: '99888777'
   },
   conceptos: [
-    { descripcion: 'Licencia Premium SaaS (Suscripción Mensual)', precio: 9900.00 }
+    { descripcion: 'Licencia Premium SaaS', precio: 9900.00, cantidad: 1, alicuota_iva: 21 }
   ]
 };
 
 try {
-  // Use a domain-specific idempotency key
   const response = await client.emitInvoice(invoiceData, 'order_tx_901842');
-  console.log(`Factura autorizada con CAE: ${response.cae}`);
-  console.log(`Visualizar PDF: ${response.url_pdf}`);
+  console.log(`CAE: ${response.cae}`);
+  console.log(`PDF: ${response.url_pdf}`);
 } catch (error) {
-  console.error("Error durante la emisión fiscal:", error.message);
+  console.error("Error:", error.message);
 }
 ```
 
-### 4. Modalidad A: Delegación Directa (Zero-Certificate Model)
-Register direct delegation to representative CUITs in Sandbox/Production without manual certificates:
+### 5. Listing Recent Invoices
 ```typescript
-try {
-  const delegation = await client.createDelegation({
-    cuit: '20254459306',
-    organization: 'Amilcar Waldemar Serra'
-  });
-  console.log(`Delegación registrada. ID: ${delegation.id}, Estado: ${delegation.status}`);
-  
-  // You can also poll the latest status
-  const status = await client.checkDelegationStatus();
-  console.log(`Estado actual de la delegación en ARCA: ${status.status}`);
-} catch (error) {
-  console.error("Error al registrar delegación:", error.message);
+const { invoices } = await client.listInvoices(10, 0);
+for (const inv of invoices) {
+  console.log(`${inv.tipo_comprobante} #${inv.numero_factura} — $${inv.total}`);
 }
 ```
 
-### 5. Modalidad B: Bóveda Criptográfica Asistida (KMS Vaults)
-If you require custom hardware KMS keys generated on the platform:
+### 6. Checking Billing Status
 ```typescript
-try {
-  // 1. Create a secure KMS vault and obtain a Certificate Signing Request (CSR)
-  const credential = await client.createCredential({
-    cuit: '20254459306',
-    organization: 'Amilcar Waldemar Serra',
-    common_name: 'KeyCAE-Production-Vault'
-  });
-  console.log(`Bóveda KMS Creada: ${credential.id}`);
-  console.log(`CSR para subir a ARCA (ex AFIP): \n${credential.csr_pem}`);
-
-  // 2. Once you sign the CSR in AFIP Portal and get the .crt file, activate the vault
-  const certPem = `-----BEGIN CERTIFICATE-----\n...your signed cert from AFIP...\n-----END CERTIFICATE-----`;
-  await client.activateCredential(credential.id, certPem);
-  console.log("¡Bóveda KMS activada e impositivamente funcional!");
-} catch (error) {
-  console.error("Fallo en la bóveda KMS:", error.message);
-}
+const billing = await client.getBillingStatus();
+console.log(`Plan: ${billing.plan} | Usadas: ${billing.invoicesEmitted}/${billing.monthlyLimit}`);
 ```
 
-### 6. Modalidad C: Importación Directa de Credenciales Existentes
-If the taxpayer already has their private key (.key) and signed certificate (.crt) from ARCA/AFIP:
-```typescript
-try {
-  const credential = await client.importCredential({
-    cuit: '20254459306',
-    organization: 'Amilcar Waldemar Serra',
-    certificate: '-----BEGIN CERTIFICATE-----\n...your CRT content...\n-----END CERTIFICATE-----',
-    private_key: '-----BEGIN RSA PRIVATE KEY-----\n...your private KEY content...\n-----END RSA PRIVATE KEY-----'
-  });
-  
-  console.log(`Credenciales importadas con éxito. ID: ${credential.id}, Estado: ${credential.status}`);
-} catch (error) {
-  console.error("Error al importar credenciales:", error.message);
-}
+---
+
+## 🔌 MCP Server Alternative
+
+Instead of the SDK, you can use the MCP server directly:
+
+```bash
+npx keycae-mcp
 ```
 
-### 7. Downloading Official Printable PDF Invoices
-Fetch the raw A4 PDF Buffer to store locally or send to clients:
-```typescript
-import * as fs from 'fs';
+This exposes 12 tools to any MCP-compatible AI agent (Claude, Cursor, Windsurf).
 
-try {
-  const invoiceId = 'inv_104820a';
-  const pdfBuffer = await client.getInvoicePdfBuffer(invoiceId);
-  fs.writeFileSync(`./factura_${invoiceId}.pdf`, pdfBuffer);
-  console.log("PDF oficial descargado y guardado en disco.");
-} catch (error) {
-  console.error("No se pudo obtener el PDF:", error.message);
-}
-```
+## Licencia
 
-### 8. Setting Up Mobile Push Alerts (Telegram)
-Configure tenant-specific instant notifications on invoice authorization:
-```typescript
-try {
-  // Save or update Telegram channel and bot tokens
-  await client.saveTelegramSettings({
-    telegram_bot_token: '123456:ABC-DEF1234ghIkl-zyx',
-    telegram_chat_id: '@MiCanalAlertasFacturas'
-  });
-  console.log("Alertas de Telegram configuradas correctamente.");
-
-  // Retrieve active settings
-  const settings = await client.getTelegramSettings();
-  console.log(`¿Tiene credenciales de alertas activas?: ${settings.has_credentials}`);
-} catch (error) {
-  console.error("Error al configurar alertas:", error.message);
-}
-```
-
-### 9. Checking API Usage and Plan Quotas (Billing)
-Monitor invoice limits, consumption percentage, and overages in real-time:
-```typescript
-try {
-  const billing = await client.getBillingStatus();
-  console.log(`Plan Actual: ${billing.plan}`);
-  console.log(`Comprobantes Emitidos: ${billing.invoicesEmitted} / ${billing.monthlyLimit}`);
-  console.log(`Porcentaje Consumido: ${billing.percentageConsumed}%`);
-  if (billing.percentageConsumed > 90) {
-    console.warn("⚠️ ¡Cerca del límite de tu cuota de facturación mensual!");
-  }
-} catch (error) {
-  console.error("Fallo al obtener consumos de facturación:", error.message);
-}
-```
+MIT

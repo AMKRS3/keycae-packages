@@ -1,5 +1,9 @@
 # keycae-ts 🚀
 
+[![npm version](https://img.shields.io/npm/v/keycae-ts.svg)](https://www.npmjs.com/package/keycae-ts)
+[![npm downloads](https://img.shields.io/npm/dm/keycae-ts.svg)](https://www.npmjs.com/package/keycae-ts)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Cliente SDK oficial en **TypeScript** y **JavaScript** para interactuar con **KeyCAE.ar** y emitir facturación electrónica oficial ante **ARCA (ex AFIP)**.
 
 ## Instalación
@@ -13,11 +17,16 @@ npm install keycae-ts
 ```typescript
 import { KeyCaeClient } from 'keycae-ts';
 
-const client = new KeyCaeClient('sk_tes...aqui');
+const client = new KeyCaeClient('sk_liv..._key');
 
 // Consultar contribuyente
 const taxpayer = await client.getTaxpayer('20254459306');
 console.log(`${taxpayer.nombre} | ${taxpayer.estado}`);
+
+// Verificar qué tipos de factura puede emitir
+const capability = await client.checkEmissionCapability('20254459306');
+console.log(`Tipos compatibles: ${capability.compatible_types.join(', ')}`);
+console.log(capability.recommendation);
 
 // Emitir factura
 const invoice = await client.emitInvoice({
@@ -58,8 +67,67 @@ const credential = await client.createCredential({
 Subida directa de certificados (.crt) y llaves (.key).
 
 ```typescript
-await client.importCertificate(credentialId, certificatePem);
+await client.importCredential({
+  cuit: '20254459306',
+  organization: 'Tu Empresa',
+  certificate: certificatePem,
+  private_key: privateKeyPem
+});
 ```
+
+## Métodos Disponibles
+
+### Taxpayers
+| Método | Descripción |
+|--------|-------------|
+| `getTaxpayer(cuit)` | Consultar contribuyente en padrón ARCA |
+| `checkEmissionCapability(cuit)` | Verificar tipos de factura compatibles |
+
+### Delegations
+| Método | Descripción |
+|--------|-------------|
+| `createDelegation(data)` | Iniciar delegación directa |
+| `checkDelegationStatus()` | Consultar estado de delegación |
+
+### Credentials (KMS)
+| Método | Descripción |
+|--------|-------------|
+| `createCredential(data)` | Generar RSA keypair + CSR |
+| `listCredentials()` | Listar certificados registrados |
+| `importCredential(data)` | Importar certificado existente |
+| `activateCredential(id, cert)` | Activar bóveda con certificado ARCA |
+| `deleteCredential(id)` | Eliminar bóveda de claves |
+
+### Invoices
+| Método | Descripción |
+|--------|-------------|
+| `emitInvoice(data, idempotencyKey?)` | Emitir factura electrónica (CAE) |
+| `getInvoice(id)` | Obtener detalles de factura |
+| `listInvoices(limit?, offset?)` | Listar facturas recientes |
+| `getInvoicePdfBuffer(id)` | Descargar PDF de factura |
+
+### Puntos de Venta
+| Método | Descripción |
+|--------|-------------|
+| `listPuntosDeVenta()` | Listar puntos de venta habilitados |
+
+### Billing & Settings
+| Método | Descripción |
+|--------|-------------|
+| `getBillingStatus()` | Estado del plan y consumo |
+| `getTelegramSettings()` | Obtener configuración Telegram |
+| `saveTelegramSettings(data)` | Guardar configuración Telegram |
+| `health()` | Health check de la API |
+
+## Tipos de Comprobante
+
+| Tipo | Descripción |
+|------|-------------|
+| `A` | IVA discriminado (Responsable Inscripto → RI) |
+| `B` | Consumidor Final (RI → CF) |
+| `C` | Exento (Monotributo / Exento) |
+| `M` | Monotributo |
+| `E` | Exportación |
 
 ## Alertas Telegram
 

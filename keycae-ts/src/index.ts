@@ -1,5 +1,9 @@
 import fetch from 'node-fetch';
 
+// ════════════════════════════════════════════════════════════════════
+//  INTERFACES
+// ════════════════════════════════════════════════════════════════════
+
 export interface TaxpayerResponse {
   cuit: string;
   nombre: string;
@@ -7,24 +11,32 @@ export interface TaxpayerResponse {
   categoria_monotributo?: string;
   es_iva_inscripto: boolean;
   estado: string;
+  condicion_iva?: string;
+  actividades?: string[];
 }
 
 export interface InvoiceReceptor {
-  tipo_doc: 'DNI' | 'CUIT' | 'CUIL' | 'PASAPORTE';
+  tipo_doc: 'DNI' | 'CUIT' | 'CUIL' | 'PASAPORTE' | 'SIN_IDENTIFICAR';
   nro_doc: string;
+  razon_social?: string;
+  condicion_iva?: string;
 }
 
 export interface InvoiceItem {
   descripcion: string;
   precio: number;
+  cantidad?: number;
+  alicuota_iva?: number;
 }
 
 export interface InvoiceInput {
   cuit_emisor: string;
   punto_de_venta: number;
-  tipo_comprobante: 'A' | 'B' | 'C' | 'M';
+  tipo_comprobante: 'A' | 'B' | 'C' | 'M' | 'E';
   receptor: InvoiceReceptor;
   conceptos: InvoiceItem[];
+  moneda?: string;
+  fecha_servicio?: string;
   brand_logo_url?: string;
   brand_color?: string;
 }
@@ -72,7 +84,7 @@ export interface DelegationInput {
 
 export interface DelegationResponse {
   id: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: 'pending' | 'accepted' | 'rejected' | 'pending_auto';
   cuit: string;
   organization: string;
   representativeCuit: string;
@@ -104,13 +116,39 @@ export interface KmsImportInput {
   private_key: string;
 }
 
+export interface PuntoDeVenta {
+  numero: number;
+  tipoEmision: string;
+  tipoAutomatizacion?: string;
+  fechaServicioDesde?: string;
+  fechaServicioHasta?: string;
+}
+
+export interface EmissionCapability {
+  cuit: string;
+  condicion_iva: string;
+  compatible_types: string[];
+  recommendation: string;
+  tip: string;
+}
+
+export interface HealthResponse {
+  status: string;
+  version?: string;
+  uptime?: number;
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  CLIENT
+// ════════════════════════════════════════════════════════════════════
+
 export class KeyCaeClient {
   private apiKey: string;
   private baseUrl: string;
 
-  constructor(apiKey: string, baseUrl: string = 'https://api.keycae.ar') {
+  constructor(apiKey: string, baseUrl: string = 'https://keycae.ar') {
     this.apiKey = apiKey;
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl.replace(/\/$/, '');
   }
 
   private async request<T>(
@@ -135,15 +173,22 @@ export class KeyCaeClient {
     });
 
     if (!response.ok) {
-      let errorDetails = '';
+      let errorData: any;
       try {
-        errorDetails = await response.text();
-      } catch (e) {}
-      throw new Error(`KeyCAE API Error (${response.status}): ${errorDetails || response.statusText}`);
+        errorData = await response.json();
+      } catch {
+        const text = await response.text().catch(() => '');
+        throw new Error(`KeyCAE API Error (${response.status}): ${text || response.statusText}`);
+      }
+      const message = errorData?.error?.message || JSON.stringify(errorData);
+      const hint = errorData?.error?.ai_action_hint || '';
+      throw new Error(`KeyCAE API Error (${response.status}): ${message}${hint ? ` [hint: ${hint}]` : ''}`);
     }
 
     return response.json() as Promise<T>;
   }
+
+  // ── Taxpayers ─────────────────────────────────────────────────────
 
   /**
    * Consultar Contribuyente en Padrón ARCA
@@ -151,6 +196,40 @@ export class KeyCaeClient {
   async getTaxpayer(cuit: string): Promise<TaxpayerResponse> {
     return this.request<TaxpayerResponse>('GET', `/v1/taxpayers/${cuit}`);
   }
+
+  /**
+   * Verificar qué tipos de factura puede emitir un CUIT según su condición fiscal
+   */
+  async checkEmissionCapability(cuit: string): Promise<EmissionCapability> {
+    const taxpayer = await this.getTaxpayer(cuit);
+    const condition = taxpayer.condicion_iva || taxpayer.estado || '';
+    let compatibleTypes: string[] = [];
+    let recommendation = '';
+
+    if (condition.toLowerCase().includes('monotributo')) {
+      compatibleTypes = ['C', 'M'];
+      recommendation = 'Como Monotributista, podés emitir Factura C (exenta) o Factura M (monotributo). NO podés emitir Factura A o B.';
+    } else if (condition.toLowerCase().includes('responsable inscripto') || condition.toLowerCase().includes('ri')) {
+      compatibleTypes = ['A', 'B'];
+      recommendation = 'Como Responsable Inscripto, podés emitir Factura A (IVA discriminado) o Factura B (consumidor final).';
+    } else if (condition.toLowerCase().includes('exento')) {
+      compatibleTypes = ['C'];
+      recommendation = 'Como Exento, solo podés emitir Factura C (exenta).';
+    } else {
+      compatibleTypes = ['C'];
+      recommendation = 'No se pudo determinar la condición impositiva. Se recomienda Factura C por defecto.';
+    }
+
+    return {
+      cuit,
+      condicion_iva: condition,
+      compatible_types: compatibleTypes,
+      recommendation,
+      tip: 'Usá estos tipos al emitir facturas con emitInvoice para evitar errores de ARCA.'
+    };
+  }
+
+  // ── Delegations ───────────────────────────────────────────────────
 
   /**
    * Registrar / Iniciar Direct Delegation
@@ -166,11 +245,20 @@ export class KeyCaeClient {
     return this.request<DelegationResponse>('GET', '/v1/delegations/status');
   }
 
+  // ── Credentials (KMS) ────────────────────────────────────────────
+
   /**
    * Crear Bóveda de Claves KMS & Generar CSR
    */
   async createCredential(data: KmsCredentialInput): Promise<KmsCredentialResponse> {
     return this.request<KmsCredentialResponse>('POST', '/v1/credentials', data);
+  }
+
+  /**
+   * Listar Credenciales Digitales Registradas
+   */
+  async listCredentials(): Promise<KmsCredentialResponse[]> {
+    return this.request<KmsCredentialResponse[]>('GET', '/v1/credentials');
   }
 
   /**
@@ -194,11 +282,28 @@ export class KeyCaeClient {
     return this.request<any>('DELETE', `/v1/credentials/${id}`);
   }
 
+  // ── Invoices ──────────────────────────────────────────────────────
+
   /**
    * Emitir Factura Electrónica Homologada (CAE)
    */
   async emitInvoice(data: InvoiceInput, idempotencyKey?: string): Promise<InvoiceResponse> {
     return this.request<InvoiceResponse>('POST', '/v1/invoices', data, idempotencyKey);
+  }
+
+  /**
+   * Obtener Detalles de una Factura por ID
+   */
+  async getInvoice(id: string): Promise<InvoiceResponse> {
+    return this.request<InvoiceResponse>('GET', `/v1/invoices/${id}`);
+  }
+
+  /**
+   * Listar Facturas Recientes
+   */
+  async listInvoices(limit: number = 10, offset: number = 0): Promise<{ invoices: InvoiceResponse[]; total: number }> {
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    return this.request<any>('GET', `/v1/invoices?${params}`);
   }
 
   /**
@@ -220,12 +325,25 @@ export class KeyCaeClient {
     return Buffer.from(arrayBuffer);
   }
 
+  // ── Puntos de Venta ───────────────────────────────────────────────
+
+  /**
+   * Listar Puntos de Venta Habilitados para Facturación Electrónica
+   */
+  async listPuntosDeVenta(): Promise<PuntoDeVenta[]> {
+    return this.request<PuntoDeVenta[]>('GET', '/v1/pos');
+  }
+
+  // ── Billing ───────────────────────────────────────────────────────
+
   /**
    * Obtener Consumos y Estado del Plan (Billing)
    */
   async getBillingStatus(): Promise<BillingStatusResponse> {
     return this.request<BillingStatusResponse>('GET', '/v1/billing/status');
   }
+
+  // ── Telegram Settings ─────────────────────────────────────────────
 
   /**
    * Obtener Ajustes de Telegram por Tenant
@@ -239,5 +357,14 @@ export class KeyCaeClient {
    */
   async saveTelegramSettings(data: TelegramSettingsInput): Promise<any> {
     return this.request<any>('POST', '/v1/settings/telegram', data);
+  }
+
+  // ── Health ────────────────────────────────────────────────────────
+
+  /**
+   * Health Check de la API
+   */
+  async health(): Promise<HealthResponse> {
+    return this.request<HealthResponse>('GET', '/health');
   }
 }

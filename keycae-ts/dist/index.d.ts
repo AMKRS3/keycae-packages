@@ -5,21 +5,29 @@ export interface TaxpayerResponse {
     categoria_monotributo?: string;
     es_iva_inscripto: boolean;
     estado: string;
+    condicion_iva?: string;
+    actividades?: string[];
 }
 export interface InvoiceReceptor {
-    tipo_doc: 'DNI' | 'CUIT' | 'CUIL' | 'PASAPORTE';
+    tipo_doc: 'DNI' | 'CUIT' | 'CUIL' | 'PASAPORTE' | 'SIN_IDENTIFICAR';
     nro_doc: string;
+    razon_social?: string;
+    condicion_iva?: string;
 }
 export interface InvoiceItem {
     descripcion: string;
     precio: number;
+    cantidad?: number;
+    alicuota_iva?: number;
 }
 export interface InvoiceInput {
     cuit_emisor: string;
     punto_de_venta: number;
-    tipo_comprobante: 'A' | 'B' | 'C' | 'M';
+    tipo_comprobante: 'A' | 'B' | 'C' | 'M' | 'E';
     receptor: InvoiceReceptor;
     conceptos: InvoiceItem[];
+    moneda?: string;
+    fecha_servicio?: string;
     brand_logo_url?: string;
     brand_color?: string;
 }
@@ -61,7 +69,7 @@ export interface DelegationInput {
 }
 export interface DelegationResponse {
     id: string;
-    status: 'pending' | 'accepted' | 'rejected';
+    status: 'pending' | 'accepted' | 'rejected' | 'pending_auto';
     cuit: string;
     organization: string;
     representativeCuit: string;
@@ -89,6 +97,25 @@ export interface KmsImportInput {
     certificate: string;
     private_key: string;
 }
+export interface PuntoDeVenta {
+    numero: number;
+    tipoEmision: string;
+    tipoAutomatizacion?: string;
+    fechaServicioDesde?: string;
+    fechaServicioHasta?: string;
+}
+export interface EmissionCapability {
+    cuit: string;
+    condicion_iva: string;
+    compatible_types: string[];
+    recommendation: string;
+    tip: string;
+}
+export interface HealthResponse {
+    status: string;
+    version?: string;
+    uptime?: number;
+}
 export declare class KeyCaeClient {
     private apiKey;
     private baseUrl;
@@ -98,6 +125,10 @@ export declare class KeyCaeClient {
      * Consultar Contribuyente en Padrón ARCA
      */
     getTaxpayer(cuit: string): Promise<TaxpayerResponse>;
+    /**
+     * Verificar qué tipos de factura puede emitir un CUIT según su condición fiscal
+     */
+    checkEmissionCapability(cuit: string): Promise<EmissionCapability>;
     /**
      * Registrar / Iniciar Direct Delegation
      */
@@ -110,6 +141,10 @@ export declare class KeyCaeClient {
      * Crear Bóveda de Claves KMS & Generar CSR
      */
     createCredential(data: KmsCredentialInput): Promise<KmsCredentialResponse>;
+    /**
+     * Listar Credenciales Digitales Registradas
+     */
+    listCredentials(): Promise<KmsCredentialResponse[]>;
     /**
      * Importar Credenciales de Firma Existentes (.key y .crt)
      */
@@ -127,9 +162,24 @@ export declare class KeyCaeClient {
      */
     emitInvoice(data: InvoiceInput, idempotencyKey?: string): Promise<InvoiceResponse>;
     /**
+     * Obtener Detalles de una Factura por ID
+     */
+    getInvoice(id: string): Promise<InvoiceResponse>;
+    /**
+     * Listar Facturas Recientes
+     */
+    listInvoices(limit?: number, offset?: number): Promise<{
+        invoices: InvoiceResponse[];
+        total: number;
+    }>;
+    /**
      * Descargar PDF de Factura (Retorna el Stream / ArrayBuffer)
      */
     getInvoicePdfBuffer(id: string): Promise<Buffer>;
+    /**
+     * Listar Puntos de Venta Habilitados para Facturación Electrónica
+     */
+    listPuntosDeVenta(): Promise<PuntoDeVenta[]>;
     /**
      * Obtener Consumos y Estado del Plan (Billing)
      */
@@ -142,4 +192,8 @@ export declare class KeyCaeClient {
      * Guardar / Actualizar Ajustes de Telegram
      */
     saveTelegramSettings(data: TelegramSettingsInput): Promise<any>;
+    /**
+     * Health Check de la API
+     */
+    health(): Promise<HealthResponse>;
 }

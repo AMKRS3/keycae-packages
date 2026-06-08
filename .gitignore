@@ -1,5 +1,7 @@
 node_modules/
 dist/
-*.tgz
-.DS_Store
+*.js.map
 .env
+.env.local
+.keycae-cli-config.json
+.DS_Store
