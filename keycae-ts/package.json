@@ -20,6 +20,11 @@
   ],
   "author": "KeyCAE Community",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AMKRS3/keycae-packages",
+    "directory": "keycae-ts"
+  },
   "dependencies": {
     "node-fetch": "^2.6.9"
   },

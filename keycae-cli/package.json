@@ -13,6 +13,11 @@
   "keywords": ["cli", "arca", "afip", "factura-electronica", "compliance", "keycae", "argentina"],
   "author": "KeyCAE Community",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AMKRS3/keycae-packages",
+    "directory": "keycae-cli"
+  },
   "dependencies": {
     "commander": "^12.0.0",
     "inquirer": "^9.0.0",
