@@ -61,6 +61,13 @@ export interface InvoiceInput {
     opcionales?: Opcional[];
     brand_logo_url?: string;
     brand_color?: string;
+    cbtes_asociados?: {
+        tipo: string | number;
+        punto_de_venta: number;
+        numero: number;
+        cuit?: string;
+        fecha?: string;
+    }[];
 }
 export interface InvoiceResponse {
     id: string;

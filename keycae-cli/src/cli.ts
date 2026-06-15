@@ -104,6 +104,12 @@ program
       console.log(`🏢 Tipo Persona: ${data.tipo_persona}`);
       console.log(`📊 Monotributo Cat: ${data.categoria_monotributo || 'No Monotributista'}`);
       console.log(`⚖️  IVA Inscripto: ${data.es_iva_inscripto ? 'SÍ' : 'NO'}`);
+      console.log(`📊 Condición IVA: ${data.condicion_iva || 'N/A'}`);
+      if (data.domicilio_fiscal) {
+        const dom = data.domicilio_fiscal;
+        const dir = [dom.direccion, dom.localidad, dom.provincia].filter(Boolean).join(', ');
+        console.log(`🏠 Domicilio Fiscal: ${dir || 'N/A'} (CP: ${dom.cod_postal || 'N/A'})`);
+      }
       console.log(`📌 Estado Fiscal: ${data.estado}`);
       console.log('----------------------------\n');
     } catch (error: any) {
@@ -115,7 +121,8 @@ program
 program
   .command('invoice-emit')
   .description('Emitir factura electrónica')
-  .action(async () => {
+  .option('--cbtes <comprobantes>', 'Comprobantes asociados (formato: TIPO-POS-NUMERO, separados por comas, ej: C-1-421)')
+  .action(async (options) => {
     const answers = await inquirer.prompt([
       { type: 'input', name: 'cuitEmisor', message: 'CUIT Emisor:', default: '20254459306' },
       { type: 'input', name: 'cuitReceptor', message: 'DNI/CUIT Receptor:', default: '35123456' },
@@ -124,16 +131,53 @@ program
         name: 'tipo',
         message: 'Tipo de comprobante:',
         choices: [
-          { name: 'C — Exento (Monotributo/Exento)', value: 'C' },
-          { name: 'A — IVA Discriminado (RI → RI)', value: 'A' },
-          { name: 'B — Consumidor Final (RI → CF)', value: 'B' },
-          { name: 'M — Monotributo', value: 'M' },
-          { name: 'E — Exportación', value: 'E' },
+          { name: 'C — Factura C (Monotributo/Exento)', value: 'C' },
+          { name: 'A — Factura A (RI → RI)', value: 'A' },
+          { name: 'B — Factura B (RI → CF)', value: 'B' },
+          { name: 'M — Factura M', value: 'M' },
+          { name: 'E — Factura E (Exportación)', value: 'E' },
+          { name: 'NCA — Nota de Crédito A', value: 'NCA' },
+          { name: 'NCB — Nota de Crédito B', value: 'NCB' },
+          { name: 'NCC — Nota de Crédito C', value: 'NCC' },
+          { name: 'NCE — Nota de Crédito E', value: 'NCE' },
+          { name: 'NCM — Nota de Crédito M', value: 'NCM' },
+          { name: 'NDA — Nota de Débito A', value: 'NDA' },
+          { name: 'NDB — Nota de Débito B', value: 'NDB' },
+          { name: 'NDC — Nota de Débito C', value: 'NDC' },
+          { name: 'NDE — Nota de Débito E', value: 'NDE' },
+          { name: 'NDM — Nota de Débito M', value: 'NDM' },
         ],
       },
       { type: 'input', name: 'precio', message: 'Monto:', default: '150000' },
       { type: 'input', name: 'descripcion', message: 'Descripción:', default: 'Servicios profesionales' },
     ]);
+
+    const isNote = ['NCA', 'NCB', 'NCC', 'NCE', 'NCM', 'NDA', 'NDB', 'NDC', 'NDE', 'NDM'].includes(answers.tipo);
+    let cbtesFlag = options.cbtes;
+
+    if (isNote && !cbtesFlag) {
+      const answersNote = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'cbtesInput',
+          message: 'Comprobantes asociados (requerido para NC/ND, formato: TIPO-POS-NUMERO, ej: C-1-1234):',
+          validate: (val) => val.trim().length > 0 ? true : 'Debe ingresar al menos un comprobante asociado.',
+        }
+      ]);
+      cbtesFlag = answersNote.cbtesInput;
+    }
+
+    let cbtes_asociados: any[] | undefined = undefined;
+    if (cbtesFlag) {
+      cbtes_asociados = cbtesFlag.split(',').map((item: string) => {
+        const parts = item.trim().split('-');
+        return {
+          tipo: parts[0],
+          punto_de_venta: parseInt(parts[1], 10) || 1,
+          numero: parseInt(parts[2], 10) || 0
+        };
+      });
+    }
 
     console.log('🚀 Emitiendo factura...');
     try {
@@ -141,9 +185,13 @@ program
         cuit_emisor: answers.cuitEmisor,
         punto_de_venta: 1,
         tipo_comprobante: answers.tipo,
-        receptor: { tipo_doc: 'DNI', nro_doc: answers.cuitReceptor },
+        receptor: { 
+          tipo_doc: answers.cuitReceptor.length === 11 ? 'CUIT' : 'DNI', 
+          nro_doc: answers.cuitReceptor 
+        },
         conceptos: [{ descripcion: answers.descripcion, precio: parseFloat(answers.precio) }],
-      }, );
+        ...(cbtes_asociados ? { cbtes_asociados } : {})
+      });
 
       console.log('\n✅ --- COMPROBANTE AUTORIZADO ---');
       console.log(`📄 Nro: ${answers.tipo}-0001-${data.numero_factura.toString().padStart(8, '0')}`);

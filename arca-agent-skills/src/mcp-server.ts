@@ -119,7 +119,14 @@ server.tool(
     opcionales: z.array(z.object({
       id: z.string(),
       valor: z.string()
-    })).optional()
+    })).optional(),
+    cbtes_asociados: z.array(z.object({
+      tipo: z.union([z.string(), z.number()]).describe("Tipo de comprobante asociado (ej: 'A', 'B', 'C' o código numérico)"),
+      punto_de_venta: z.number().describe("Punto de venta del comprobante asociado"),
+      numero: z.number().describe("Número secuencial del comprobante asociado"),
+      cuit: z.string().optional().describe("CUIT del emisor del comprobante asociado en caso de ser distinto"),
+      fecha: z.string().optional().describe("Fecha del comprobante asociado (YYYYMMDD)")
+    })).optional().describe("Comprobantes asociados (requerido para notas de crédito/débito)")
   },
   async (args) => {
     const result = await api("POST", "/v1/invoices", args);

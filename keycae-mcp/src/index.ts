@@ -101,6 +101,13 @@ server.tool(
       id: z.string().describe("Optional data ID (see ARCA table)"),
       valor: z.string()
     })).optional().describe("Optional data fields"),
+    cbtes_asociados: z.array(z.object({
+      tipo: z.union([z.string(), z.number()]).describe("Document type of the associated invoice (e.g. 'A', 'B', 'C' or numeric code)"),
+      punto_de_venta: z.number().describe("Point of sale of the associated invoice"),
+      numero: z.number().describe("Sequential number of the associated invoice"),
+      cuit: z.string().optional().describe("CUIT of the issuer of the associated invoice if different"),
+      fecha: z.string().optional().describe("Date of the associated invoice (YYYYMMDD)")
+    })).optional().describe("Associated documents (required for credit/debit notes)")
   },
   async (args) => {
     const result = await api("POST", "/v1/invoices", args);
