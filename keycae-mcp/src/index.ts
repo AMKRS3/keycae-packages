@@ -8,10 +8,11 @@
  * 
  * Usage:
  *   npx keycae-mcp                    # stdio mode (for Claude, Cursor, etc.)
+ *   KEYCAE_API_KEY=sk_test_public_sandbox_cuit_20999999999 npx keycae-mcp
  *   KEYCAE_API_KEY=sk_live_xxx npx keycae-mcp
  * 
  * Environment:
- *   KEYCAE_API_KEY     - Your KeyCAE API key (required)
+ *   KEYCAE_API_KEY     - Your KeyCAE API key (required). Use 'sk_test_public_sandbox_cuit_20999999999' for public sandbox.
  *   KEYCAE_API_URL     - API base URL (default: https://keycae.ar)
  */
 
@@ -24,7 +25,7 @@ const API_KEY = process.env.KEYCAE_API_KEY || "";
 const BASE_URL = (process.env.KEYCAE_API_URL || "https://keycae.ar").replace(/\/$/, "");
 
 if (!API_KEY) {
-  console.error("❌ KEYCAE_API_KEY is required. Get one at https://keycae.ar/dashboard");
+  console.error("❌ KEYCAE_API_KEY is required. Get one at https://keycae.ar/dashboard or use the public sandbox key: sk_test_public_sandbox_cuit_20999999999");
   process.exit(1);
 }
 
