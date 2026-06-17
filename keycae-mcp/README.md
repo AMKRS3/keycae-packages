@@ -48,6 +48,10 @@ Sin esta delegación, no podés emitir facturas. El MCP server te permite verifi
 
 ## 🔧 Configuration
 
+The MCP server requires a `KEYCAE_API_KEY` to run. You can configure it with:
+- **Sandbox Mode (No registration needed):** Use the public sandbox key `sk_test_public_sandbox_cuit_20999999999`. Note that in Sandbox mode you must emit using CUIT `20999999999`.
+- **Production Mode:** Use your live API key `sk_live_...` generated when registering on [keycae.ar](https://keycae.ar).
+
 ### Claude Desktop
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
@@ -59,7 +63,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "command": "npx",
       "args": ["-y", "keycae-mcp"],
       "env": {
-        "KEYCAE_API_KEY": "sk_live_..."
+        "KEYCAE_API_KEY": "sk_test_public_sandbox_cuit_20999999999"
       }
     }
   }
@@ -77,7 +81,7 @@ Add to `.cursor/mcp.json` in your project:
       "command": "npx",
       "args": ["-y", "keycae-mcp"],
       "env": {
-        "KEYCAE_API_KEY": "sk_live_..."
+        "KEYCAE_API_KEY": "sk_test_public_sandbox_cuit_20999999999"
       }
     }
   }

@@ -28,6 +28,8 @@ npx keycae-mcp
 
 ### Configuración en Claude Desktop / Cursor / Windsurf
 
+Puedes usar la clave de sandbox pública para probar de inmediato:
+
 ```json
 {
   "mcpServers": {
@@ -35,12 +37,13 @@ npx keycae-mcp
       "command": "npx",
       "args": ["-y", "keycae-mcp"],
       "env": {
-        "KEYCAE_API_KEY": "sk_liv..._key"
+        "KEYCAE_API_KEY": "sk_test_public_sandbox_cuit_20999999999"
       }
     }
   }
 }
 ```
+*(Nota: Para producción, reemplázalo por tu clave real `sk_live_...` obtenida al registrarte en [keycae.ar](https://keycae.ar))*
 
 ### Tools Disponibles (12)
 
@@ -78,19 +81,20 @@ npm install keycae-ts
 ```typescript
 import { KeyCaeClient } from 'keycae-ts';
 
-const client = new KeyCaeClient('sk_liv..._key');
+// Inicializar con la clave del Sandbox Público:
+const client = new KeyCaeClient('sk_test_public_sandbox_cuit_20999999999');
 
-// Consultar contribuyente
-const taxpayer = await client.getTaxpayer('20254459306');
+// Consultar contribuyente de pruebas en el Sandbox:
+const taxpayer = await client.getTaxpayer('20999999999');
 console.log(`${taxpayer.nombre} | ${taxpayer.estado}`);
 
-// Verificar compatibilidad de tipos de factura
-const cap = await client.checkEmissionCapability('20254459306');
+// Verificar compatibilidad de tipos de factura para el CUIT de pruebas:
+const cap = await client.checkEmissionCapability('20999999999');
 console.log(cap.recommendation);
 
-// Emitir factura
+// Emitir factura simulada en el Sandbox:
 const invoice = await client.emitInvoice({
-  cuit_emisor: '20254459306',
+  cuit_emisor: '20999999999',
   punto_de_venta: 1,
   tipo_comprobante: 'C',
   receptor: { tipo_doc: 'DNI', nro_doc: '35123456' },

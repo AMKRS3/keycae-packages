@@ -14,10 +14,17 @@ npm install keycae-ts
 
 ## Inicio Rápido
 
+El SDK soporta tanto el **Sandbox Público** (sin cuenta, ideal para desarrollo rápido) como el entorno de **Producción** (con cuenta registrada):
+
+* **Para Probar en Sandbox (Sin Cuenta):** Usa la clave pública `sk_test_public_sandbox_cuit_20999999999` y el CUIT de pruebas `20999999999`.
+* **Para Producción (Con Cuenta):** Regístrate en [keycae.ar](https://keycae.ar) para obtener tu API Key `sk_live_...` y configura tu CUIT real.
+
 ```typescript
 import { KeyCaeClient } from 'keycae-ts';
 
-const client = new KeyCaeClient('sk_liv..._key');
+// Ejemplo para Sandbox Público:
+const client = new KeyCaeClient('sk_test_public_sandbox_cuit_20999999999');
+// O para producción: const client = new KeyCaeClient('sk_live_tu_api_key');
 
 // Consultar contribuyente
 const taxpayer = await client.getTaxpayer('20254459306');
