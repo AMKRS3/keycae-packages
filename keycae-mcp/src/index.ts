@@ -379,6 +379,24 @@ server.tool(
   }
 );
 
+// 15. GET COTIZACION ───────────────────────────────────────────────
+server.tool(
+  "get_cotizacion",
+  "Get the official exchange rate for a foreign currency against the Argentine Peso (ARS) via ARCA/AFIP.",
+  {
+    moneda: z.string().describe("Currency code (e.g. DOL, EUR, BRL)")
+  },
+  async (args) => {
+    const result = await api("GET", `/v1/cotizacion/${args.moneda}`);
+    return {
+      content: [{
+        type: "text" as const,
+        text: JSON.stringify(result, null, 2)
+      }]
+    };
+  }
+);
+
 // ════════════════════════════════════════════════════════════════════
 //  RESOURCES (for agent context)
 // ════════════════════════════════════════════════════════════════════
