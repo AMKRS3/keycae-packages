@@ -411,10 +411,15 @@ server.resource(
       mimeType: "text/markdown",
       text: `# KeyCAE - Argentine Electronic Invoicing API
 
+## Access Model: Sandbox vs Production
+- **Sandbox Testing (No Account Needed):** Use the public sandbox API Key \`sk_test_public_sandbox_cuit_20999999999\` and issuer CUIT \`20999999999\`. No registration, CSRs, or ARCA delegation required. Testing is free and unlimited.
+- **Production Mode:** Register at https://keycae.ar to get a \`sk_live_...\` key, and delegate your CUIT to KeyCAE's representative CUIT \`20254459306\` in ARCA.
+
 ## Quick Start
-1. Get API key at https://keycae.ar/dashboard
-2. Set KEYCAE_API_KEY environment variable
-3. Use tools: emit_invoice, check_delegation, list_credentials
+1. Set the \`KEYCAE_API_KEY\` environment variable (e.g. \`sk_test_public_sandbox_cuit_20999999999\` for sandbox testing).
+2. Connect the MCP server.
+3. Call tools like \`emit_invoice\` directly.
+4. Use tools: emit_invoice, check_delegation, list_credentials
 
 ## Invoice Types
 - **Factura A**: IVA discriminado (Responsable Inscripto → Responsable Inscripto)
@@ -447,7 +452,8 @@ server.resource(
 - Rate limit: 100 req/min per API key
 
 ## Pricing
-- Free: 50 invoices/month
+- Sandbox: Free & Unlimited (Testing environment, CUIT 20999999999)
+- Free: 50 invoices/month (Production environment)
 - Developer: 1,000 invoices/month ($9,900 ARS)
 - Platform: Unlimited ($59,000 ARS)
 `
