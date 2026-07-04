@@ -76,7 +76,9 @@ server.tool(
       tipo_doc: z.enum(["CUIT", "CUIL", "DNI", "PASAPORTE", "SIN_IDENTIFICAR"]),
       nro_doc: z.string().describe("Document number"),
       razon_social: z.string().optional().describe("Business name"),
-      condicion_iva: z.string().optional().describe("IVA condition: Responsable Inscripto, Monotributo, Consumidor Final, Exento")
+      condicion_iva: z.string().optional().describe("IVA condition: Responsable Inscripto, Monotributo, Consumidor Final, Exento"),
+      direccion: z.string().optional().describe("Address of the recipient"),
+      provincia: z.string().optional().describe("Province of the recipient")
     }).describe("Invoice recipient"),
     conceptos: z.array(z.object({
       descripcion: z.string().describe("Item description"),
