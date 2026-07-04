@@ -353,8 +353,12 @@ export class KeyCaeClient {
   /**
    * Descargar PDF de Factura (Retorna el Stream / ArrayBuffer)
    */
-  async getInvoicePdfBuffer(id: string): Promise<Buffer> {
-    const response = await fetch(`${this.baseUrl}/v1/invoices/${id}/pdf`, {
+  async getInvoicePdfBuffer(id: string, options?: { format?: 'a4' | 'ticket' }): Promise<Buffer> {
+    const url = new URL(`${this.baseUrl}/v1/invoices/${id}/pdf`);
+    if (options?.format) {
+      url.searchParams.append('format', options.format);
+    }
+    const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${this.apiKey}`
@@ -365,8 +369,7 @@ export class KeyCaeClient {
       throw new Error(`Failed to fetch PDF (${response.status})`);
     }
 
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    return Buffer.from(await response.arrayBuffer());
   }
 
   // ── Puntos de Venta ───────────────────────────────────────────────

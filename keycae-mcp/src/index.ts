@@ -126,7 +126,7 @@ server.tool(
           url_pdf: result.url_pdf,
           url_qr: result.url_qr,
           vencimiento_cae: result.cae_vencimiento,
-          message: `✅ Factura ${tipo} emitida. CAE: ${result.cae}. PDF: ${result.url_pdf}`
+          message: `✅ Factura ${tipo} emitida. CAE: ${result.cae}. PDF: ${result.url_pdf} (Añadir ?format=ticket para Ticket 80mm)`
         }, null, 2)
       }]
     };
