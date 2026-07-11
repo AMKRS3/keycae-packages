@@ -147,8 +147,12 @@ class KeyCaeClient {
     /**
      * Descargar PDF de Factura (Retorna el Stream / ArrayBuffer)
      */
-    async getInvoicePdfBuffer(id) {
-        const response = await (0, node_fetch_1.default)(`${this.baseUrl}/v1/invoices/${id}/pdf`, {
+    async getInvoicePdfBuffer(id, options) {
+        const url = new URL(`${this.baseUrl}/v1/invoices/${id}/pdf`);
+        if (options?.format) {
+            url.searchParams.append('format', options.format);
+        }
+        const response = await (0, node_fetch_1.default)(url.toString(), {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.apiKey}`
@@ -157,8 +161,7 @@ class KeyCaeClient {
         if (!response.ok) {
             throw new Error(`Failed to fetch PDF (${response.status})`);
         }
-        const arrayBuffer = await response.arrayBuffer();
-        return Buffer.from(arrayBuffer);
+        return Buffer.from(await response.arrayBuffer());
     }
     // ── Puntos de Venta ───────────────────────────────────────────────
     /**
@@ -207,6 +210,36 @@ class KeyCaeClient {
      */
     async getCotizacionMoneda(moneda) {
         return this.request('GET', `/v1/cotizacion/${moneda}`);
+    }
+    // ── Partners (ERP / SaaS) ────────────────────────────────────────
+    // Estos métodos requieren instanciar el cliente con tu API Key de
+    // Partner (sk_partner_live_...) — solo desde tu backend.
+    /**
+     * Crear una subcuenta completa (usuario + perfil + API Key) para un
+     * cliente final de tu ERP. La password y api_key se devuelven una sola vez.
+     */
+    async createPartnerSubaccount(data) {
+        return this.request('POST', '/v1/partners/subaccounts', data);
+    }
+    /**
+     * Listar los clientes vinculados a tu partner, con plan y consumo mensual.
+     */
+    async listPartnerSubaccounts() {
+        return this.request('GET', '/v1/partners/subaccounts');
+    }
+    /**
+     * Pre-autorizar el CUIT de un cliente para facturación consolidada
+     * (el cliente no pasará por la pasarela de pago al registrarse).
+     */
+    async preauthorizeCuit(cuit) {
+        return this.request('POST', '/v1/partners/preauthorize', { cuit });
+    }
+    /**
+     * Consultar la configuración pública de co-branding de un partner
+     * (endpoint público — no requiere autenticación).
+     */
+    async getPartnerConfig(partnerId) {
+        return this.request('GET', `/v1/partners/${encodeURIComponent(partnerId)}/config`);
     }
 }
 exports.KeyCaeClient = KeyCaeClient;

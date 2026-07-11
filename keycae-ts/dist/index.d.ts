@@ -154,6 +154,51 @@ export interface HealthResponse {
     version?: string;
     uptime?: number;
 }
+export interface PartnerSubaccountInput {
+    /** CUIT fiscal del cliente final (11 dígitos, sin guiones) */
+    cuit: string;
+    /** Razón social del cliente final */
+    organization: string;
+    /** Email de acceso del cliente final */
+    email: string;
+}
+export interface PartnerSubaccountResponse {
+    id: string;
+    cuit: string;
+    organization: string;
+    email: string;
+    /** Contraseña generada — se devuelve UNA sola vez. Entregar por canal seguro. */
+    password: string;
+    /** API Key live de la subcuenta — se devuelve UNA sola vez. */
+    api_key: string;
+    partner_id: string;
+}
+export interface PartnerClient {
+    cuit: string;
+    organization: string;
+    email: string;
+    plan: 'free' | 'developer' | 'platform';
+    invoices_this_month: number;
+    created_at: string | null;
+}
+export interface PartnerClientsResponse {
+    partner_id: string;
+    total: number;
+    clients: PartnerClient[];
+}
+export interface PartnerPreauthResponse {
+    success: boolean;
+    message: string;
+    partner_id: string;
+    cuit: string;
+}
+export interface PartnerPublicConfig {
+    id: string;
+    name: string;
+    logo_url: string;
+    brand_color: string;
+    billing_mode: 'decentralized' | 'consolidated';
+}
 export declare class KeyCaeClient {
     private apiKey;
     private baseUrl;
@@ -213,7 +258,9 @@ export declare class KeyCaeClient {
     /**
      * Descargar PDF de Factura (Retorna el Stream / ArrayBuffer)
      */
-    getInvoicePdfBuffer(id: string): Promise<Buffer>;
+    getInvoicePdfBuffer(id: string, options?: {
+        format?: 'a4' | 'ticket';
+    }): Promise<Buffer>;
     /**
      * Listar Puntos de Venta Habilitados para Facturación Electrónica
      */
@@ -245,4 +292,23 @@ export declare class KeyCaeClient {
         moneda: string;
         cotizacion: number;
     }>;
+    /**
+     * Crear una subcuenta completa (usuario + perfil + API Key) para un
+     * cliente final de tu ERP. La password y api_key se devuelven una sola vez.
+     */
+    createPartnerSubaccount(data: PartnerSubaccountInput): Promise<PartnerSubaccountResponse>;
+    /**
+     * Listar los clientes vinculados a tu partner, con plan y consumo mensual.
+     */
+    listPartnerSubaccounts(): Promise<PartnerClientsResponse>;
+    /**
+     * Pre-autorizar el CUIT de un cliente para facturación consolidada
+     * (el cliente no pasará por la pasarela de pago al registrarse).
+     */
+    preauthorizeCuit(cuit: string): Promise<PartnerPreauthResponse>;
+    /**
+     * Consultar la configuración pública de co-branding de un partner
+     * (endpoint público — no requiere autenticación).
+     */
+    getPartnerConfig(partnerId: string): Promise<PartnerPublicConfig>;
 }

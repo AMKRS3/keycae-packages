@@ -126,6 +126,31 @@ await client.importCredential({
 | `saveTelegramSettings(data)` | Guardar configuración Telegram |
 | `health()` | Health check de la API |
 
+### Partners (ERPs / SaaS)
+| Método | Descripción |
+|--------|-------------|
+| `createPartnerSubaccount(data)` | Crear subcuenta completa para un cliente final (usuario + API Key) |
+| `listPartnerSubaccounts()` | Listar tus clientes con plan y consumo mensual |
+| `preauthorizeCuit(cuit)` | Pre-autorizar un CUIT para facturación consolidada |
+| `getPartnerConfig(partnerId)` | Configuración pública de co-branding (sin auth) |
+
+> Los métodos de Partners requieren instanciar el cliente con tu **API Key de Partner** (`sk_partner_live_...`) y solo deben usarse desde tu backend:
+>
+> ```typescript
+> const partnerClient = new KeyCaeClient('sk_partner_live_mi-erp_...');
+>
+> const sub = await partnerClient.createPartnerSubaccount({
+>   cuit: '20304567891',
+>   organization: 'Cliente S.A.',
+>   email: 'cliente@empresa.com'
+> });
+> // sub.api_key y sub.password se devuelven UNA sola vez
+>
+> const { clients, total } = await partnerClient.listPartnerSubaccounts();
+> ```
+>
+> 📖 Guía completa del programa de partners: [keycae.ar/docs/partners.md](https://keycae.ar/docs/partners.md)
+
 ## Tipos de Comprobante
 
 | Tipo | Descripción |

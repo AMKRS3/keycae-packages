@@ -182,6 +182,59 @@ export interface HealthResponse {
   uptime?: number;
 }
 
+// ── Partners (ERP / SaaS Integrations) ──────────────────────────────
+
+export interface PartnerSubaccountInput {
+  /** CUIT fiscal del cliente final (11 dígitos, sin guiones) */
+  cuit: string;
+  /** Razón social del cliente final */
+  organization: string;
+  /** Email de acceso del cliente final */
+  email: string;
+}
+
+export interface PartnerSubaccountResponse {
+  id: string;
+  cuit: string;
+  organization: string;
+  email: string;
+  /** Contraseña generada — se devuelve UNA sola vez. Entregar por canal seguro. */
+  password: string;
+  /** API Key live de la subcuenta — se devuelve UNA sola vez. */
+  api_key: string;
+  partner_id: string;
+}
+
+export interface PartnerClient {
+  cuit: string;
+  organization: string;
+  email: string;
+  plan: 'free' | 'developer' | 'platform';
+  invoices_this_month: number;
+  created_at: string | null;
+}
+
+export interface PartnerClientsResponse {
+  partner_id: string;
+  total: number;
+  clients: PartnerClient[];
+}
+
+export interface PartnerPreauthResponse {
+  success: boolean;
+  message: string;
+  partner_id: string;
+  cuit: string;
+}
+
+export interface PartnerPublicConfig {
+  id: string;
+  name: string;
+  logo_url: string;
+  brand_color: string;
+  billing_mode: 'decentralized' | 'consolidated';
+}
+
 // ════════════════════════════════════════════════════════════════════
 //  CLIENT
 // ════════════════════════════════════════════════════════════════════
@@ -431,5 +484,40 @@ export class KeyCaeClient {
    */
   async getCotizacionMoneda(moneda: string): Promise<{ moneda: string; cotizacion: number }> {
     return this.request<any>('GET', `/v1/cotizacion/${moneda}`);
+  }
+
+  // ── Partners (ERP / SaaS) ────────────────────────────────────────
+  // Estos métodos requieren instanciar el cliente con tu API Key de
+  // Partner (sk_partner_live_...) — solo desde tu backend.
+
+  /**
+   * Crear una subcuenta completa (usuario + perfil + API Key) para un
+   * cliente final de tu ERP. La password y api_key se devuelven una sola vez.
+   */
+  async createPartnerSubaccount(data: PartnerSubaccountInput): Promise<PartnerSubaccountResponse> {
+    return this.request<PartnerSubaccountResponse>('POST', '/v1/partners/subaccounts', data);
+  }
+
+  /**
+   * Listar los clientes vinculados a tu partner, con plan y consumo mensual.
+   */
+  async listPartnerSubaccounts(): Promise<PartnerClientsResponse> {
+    return this.request<PartnerClientsResponse>('GET', '/v1/partners/subaccounts');
+  }
+
+  /**
+   * Pre-autorizar el CUIT de un cliente para facturación consolidada
+   * (el cliente no pasará por la pasarela de pago al registrarse).
+   */
+  async preauthorizeCuit(cuit: string): Promise<PartnerPreauthResponse> {
+    return this.request<PartnerPreauthResponse>('POST', '/v1/partners/preauthorize', { cuit });
+  }
+
+  /**
+   * Consultar la configuración pública de co-branding de un partner
+   * (endpoint público — no requiere autenticación).
+   */
+  async getPartnerConfig(partnerId: string): Promise<PartnerPublicConfig> {
+    return this.request<PartnerPublicConfig>('GET', `/v1/partners/${encodeURIComponent(partnerId)}/config`);
   }
 }

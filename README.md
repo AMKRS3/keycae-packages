@@ -10,7 +10,7 @@ Diseñado para developers humanos y **agentes autónomos de IA** (Cursor, Windsu
 
 | Paquete | Directorio | Descripción | npm |
 |---------|------------|-------------|-----|
-| **`keycae-ts`** | [`/keycae-ts`](./keycae-ts) | SDK oficial TypeScript/JavaScript (16 métodos) | [![npm](https://img.shields.io/npm/v/keycae-ts)](https://www.npmjs.com/package/keycae-ts) |
+| **`keycae-ts`** | [`/keycae-ts`](./keycae-ts) | SDK oficial TypeScript/JavaScript (20 métodos, incluye API de Partners) | [![npm](https://img.shields.io/npm/v/keycae-ts)](https://www.npmjs.com/package/keycae-ts) |
 | **`keycae-mcp`** | [`/keycae-mcp`](./keycae-mcp) | MCP Server para AI agents (12 tools) | [![npm](https://img.shields.io/npm/v/keycae-mcp)](https://www.npmjs.com/package/keycae-mcp) |
 | **`keycae-cli`** | [`/keycae-cli`](./keycae-cli) | CLI interactiva de terminal (12 comandos) | [![npm](https://img.shields.io/npm/v/keycae-cli)](https://www.npmjs.com/package/keycae-cli) |
 | **`arca-agent-skills`** | [`/arca-agent-skills`](./arca-agent-skills) | MCP Server + System prompts para agentes IA (12 tools) | — |
@@ -134,6 +134,35 @@ Antes de facturar, debés delegar la facturación electrónica a KeyCAE en ARCA:
 1. Ingresá a [ARCA Clave Fiscal](https://serviciosweb.afip.gob.ar/clavefiscal/adminrel/pending.aspx)
 2. Buscá el servicio **"Facturación Electrónica"** (ws://wsfe)
 3. Delegá al CUIT: **20254459306** (Amilcar Waldemar Serra)
+
+---
+
+## 🤝 Integración para Partners (ERPs / SaaS)
+
+¿Desarrollás un ERP o SaaS? Ofrecé facturación electrónica ARCA a tus clientes con tu propia marca:
+
+- **Enlace de onboarding co-brandeado**: `https://app.keycae.ar/login.html?partner=TU_ID` — la pantalla de registro se adapta a tu logo y colores.
+- **Alta programática de subcuentas** desde tu backend con tu API Key de partner (`sk_partner_live_...`).
+- **Facturación consolidada opcional**: una sola factura mensual de KeyCAE por todos tus clientes.
+- **Precios especiales negociables** del plan Unlimited para tus usuarios.
+
+```typescript
+import { KeyCaeClient } from 'keycae-ts';
+
+const partner = new KeyCaeClient('sk_partner_live_mi-erp_...');
+
+// Dar de alta un cliente cuando activa facturación en tu ERP
+const sub = await partner.createPartnerSubaccount({
+  cuit: '20304567891',
+  organization: 'Cliente S.A.',
+  email: 'cliente@empresa.com'
+});
+
+// Ver todos tus clientes con su consumo
+const { clients } = await partner.listPartnerSubaccounts();
+```
+
+📖 Guía completa: [keycae.ar/docs/partners.md](https://keycae.ar/docs/partners.md)
 
 ---
 
