@@ -48,6 +48,22 @@ console.log(`CAE: ${invoice.cae}`);
 console.log(`PDF: ${invoice.url_pdf}`);
 ```
 
+### Precios netos (sin IVA)
+
+Por defecto `conceptos[].precio` se envía con IVA incluido. Si tu sistema maneja precios netos, pasá `iva_incluido: false` y KeyCAE calcula el IVA automáticamente:
+
+```typescript
+const invoice = await client.emitInvoice({
+  cuit_emisor: '20254459306',
+  punto_de_venta: 1,
+  tipo_comprobante: 'A',
+  iva_incluido: false, // conceptos[].precio son netos
+  receptor: { tipo_doc: 'CUIT', nro_doc: '30999888776' },
+  conceptos: [{ descripcion: 'Servicio profesional', precio: 1000, alicuota_iva: 21 }]
+}, 'idempotency_key_43');
+// → Neto $1.000 | IVA 21% $210 | Total $1.210
+```
+
 ## Modelos de Conexión
 
 ### Modalidad A: Delegación Directa (Recomendada)

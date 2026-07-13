@@ -65,6 +65,13 @@ export interface InvoiceInput {
     | 'FCE_NCA' | 'FCE_NCB' | 'FCE_NCC';
   receptor: InvoiceReceptor;
   conceptos: InvoiceItem[];
+  /**
+   * Default `true`: los `conceptos[].precio` se envían con IVA incluido (precio final).
+   * Con `false`, los precios se interpretan como netos (sin IVA) y KeyCAE calcula
+   * y adiciona el IVA según la `alicuota_iva` de cada ítem.
+   * Sin efecto en comprobantes sin discriminación de IVA (tipo C / E).
+   */
+  iva_incluido?: boolean;
   tributos?: Tributo[];
   moneda?: string;
   moneda_cotizacion?: number;
