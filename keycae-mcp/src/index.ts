@@ -110,7 +110,12 @@ server.tool(
       numero: z.number().describe("Sequential number of the associated invoice"),
       cuit: z.string().optional().describe("CUIT of the issuer of the associated invoice if different"),
       fecha: z.string().optional().describe("Date of the associated invoice (YYYYMMDD)")
-    })).optional().describe("Associated documents (required for credit/debit notes)")
+    })).optional().describe("Associated documents (required for credit/debit notes)"),
+    iva_incluido: z.boolean().optional().describe("If false, conceptos[].precio are treated as NET (VAT-excluded) and IVA is added automatically per each item's alicuota_iva. Default true (prices already include VAT). No effect on types C/E."),
+    emisor_razon_social: z.string().optional().describe("Issuer business name printed on the PDF header. Per-invoice override, no account needed; takes precedence over account branding."),
+    emisor_direccion: z.string().optional().describe("Issuer fiscal address printed on the PDF (per-invoice override)."),
+    emisor_ingresos_brutos: z.string().optional().describe("Issuer Ingresos Brutos number printed on the PDF (per-invoice override, no account needed)."),
+    emisor_inicio_actividades: z.string().optional().describe("Issuer activity start date printed on the PDF, DD/MM/YYYY (per-invoice override).")
   },
   async (args) => {
     const result = await api("POST", "/v1/invoices", args);

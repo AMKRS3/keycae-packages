@@ -64,6 +64,26 @@ const invoice = await client.emitInvoice({
 // → Neto $1.000 | IVA 21% $210 | Total $1.210
 ```
 
+### Datos fiscales del emisor en el PDF
+
+Los datos del emisor que se imprimen en el PDF (razón social, domicilio, Ingresos Brutos, inicio de actividades) se pueden enviar **por comprobante**. Tienen prioridad sobre la configuración de la cuenta y **no requieren cuenta ni login** (funcionan también en sandbox):
+
+```typescript
+const invoice = await client.emitInvoice({
+  cuit_emisor: '20254459306',
+  punto_de_venta: 1,
+  tipo_comprobante: 'B',
+  emisor_razon_social: 'Mi Empresa S.A.',
+  emisor_ingresos_brutos: '901-999999-9',
+  emisor_direccion: 'Av. Corrientes 1500, CABA',
+  emisor_inicio_actividades: '01/03/2021',
+  receptor: { tipo_doc: 'SIN_IDENTIFICAR', nro_doc: '0' },
+  conceptos: [{ descripcion: 'Producto', precio: 1210 }]
+});
+```
+
+Los cuatro campos `emisor_*` son opcionales; enviá sólo los que quieras que aparezcan.
+
 ## Modelos de Conexión
 
 ### Modalidad A: Delegación Directa (Recomendada)

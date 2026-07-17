@@ -68,6 +68,16 @@ export interface InvoiceInput {
     opcionales?: Opcional[];
     brand_logo_url?: string;
     brand_color?: string;
+    /**
+     * Datos fiscales del emisor a imprimir en el PDF. Override por comprobante:
+     * tienen prioridad sobre la configuración de la cuenta (Personalizar PDF) y
+     * no requieren cuenta ni login, por lo que funcionan también desde sandbox.
+     * Cada campo se resuelve de forma independiente.
+     */
+    emisor_razon_social?: string;
+    emisor_direccion?: string;
+    emisor_ingresos_brutos?: string;
+    emisor_inicio_actividades?: string;
     cbtes_asociados?: {
         tipo: string | number;
         punto_de_venta: number;
