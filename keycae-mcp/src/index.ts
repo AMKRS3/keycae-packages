@@ -446,6 +446,12 @@ server.resource(
 5. emit_invoice → Issue the invoice (24 types, tributos, foreign currency)
 6. get_invoice → Retrieve details
 
+## PDF, Pricing & Issuer Data
+- **Net pricing:** pass \`iva_incluido: false\` to send \`conceptos[].precio\` as NET (VAT-excluded); KeyCAE adds IVA per each item's \`alicuota_iva\`. Default is true (prices include VAT). No effect on types C/E.
+- **Decimal precision:** \`precio\` accepts unlimited decimals and is never truncated. To avoid cent-level drift, send the price you already have rather than deriving the net and rounding it.
+- **Issuer data on the PDF:** \`emisor_razon_social\`, \`emisor_direccion\`, \`emisor_ingresos_brutos\`, \`emisor_inicio_actividades\` can be sent per-invoice. They print on the PDF, need no account (work in sandbox), and take precedence over account-level branding.
+- **Ticket 80mm:** append \`?format=ticket\` to the invoice \`url_pdf\` to get a thermal-printer version instead of A4.
+
 ## ARCA/AFIP Notes
 - CUIT must delegate electronic invoicing to KeyCAE's representative CUIT
 - Delegation is automatic if Hermes is enabled

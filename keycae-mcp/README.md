@@ -92,7 +92,7 @@ Add to `.cursor/mcp.json` in your project:
 
 | Tool | Description |
 |------|-------------|
-| `emit_invoice` | Emitir factura (24 tipos: A/B/C/M/E + 5 NC + 5 ND + 9 FCE MiPyMEs) |
+| `emit_invoice` | Emitir factura (24 tipos: A/B/C/M/E + 5 NC + 5 ND + 9 FCE MiPyMEs). Soporta precios netos (`iva_incluido`), tributos, moneda extranjera y datos del emisor por comprobante (`emisor_razon_social`, `emisor_ingresos_brutos`, etc.) |
 | `get_invoice` | Consultar factura por ID |
 | `list_invoices` | Listar facturas recientes |
 | `list_credentials` | Listar certificados digitales |
