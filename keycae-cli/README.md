@@ -47,13 +47,13 @@ $ keycae init
 
 ### Consultar un contribuyente
 ```bash
-$ keycae taxpayers 20254459306
+$ keycae taxpayers 20999999999
 📋 --- Datos Impositivos ---
-👤 Razón Social: KeyCAE Software S.A.
-🆔 CUIT: 20254459306
+👤 Razón Social: Empresa de Pruebas S.A.
+🆔 CUIT: 20999999999
 🏢 Tipo Persona: Juridica
-📊 Monotributo Cat: No Monotributista
-⚖️  IVA Inscripto: SÍ
+📊 Monotributo Cat: H
+⚖️  IVA Inscripto: NO
 📌 Estado Fiscal: ACTIVO
 ```
 

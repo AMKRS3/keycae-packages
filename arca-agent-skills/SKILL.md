@@ -57,7 +57,7 @@ const client = new KeyCaeClient(
 ### 2. Validating a Taxpayer CUIT
 ```typescript
 try {
-  const taxpayer = await client.getTaxpayer('20254459306');
+  const taxpayer = await client.getTaxpayer('20999999999');
   console.log(`Razón Social: ${taxpayer.nombre}`);
   console.log(`Condición IVA: ${taxpayer.condicion_iva}`);
 } catch (error) {
@@ -67,7 +67,7 @@ try {
 
 ### 3. Checking Emission Capability
 ```typescript
-const cap = await client.checkEmissionCapability('20254459306');
+const cap = await client.checkEmissionCapability('20999999999');
 console.log(`Tipos compatibles: ${cap.compatible_types.join(', ')}`);
 console.log(cap.recommendation);
 ```
@@ -75,7 +75,7 @@ console.log(cap.recommendation);
 ### 4. Emitting an Invoice with Idempotency
 ```typescript
 const invoiceData = {
-  cuit_emisor: '20254459306',
+  cuit_emisor: '20999999999',
   punto_de_venta: 1,
   tipo_comprobante: 'C' as const,
   receptor: {

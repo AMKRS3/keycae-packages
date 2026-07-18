@@ -27,17 +27,17 @@ const client = new KeyCaeClient('sk_test_public_sandbox_cuit_20999999999');
 // O para producción: const client = new KeyCaeClient('sk_live_tu_api_key');
 
 // Consultar contribuyente
-const taxpayer = await client.getTaxpayer('20254459306');
+const taxpayer = await client.getTaxpayer('20999999999');
 console.log(`${taxpayer.nombre} | ${taxpayer.estado}`);
 
 // Verificar qué tipos de factura puede emitir
-const capability = await client.checkEmissionCapability('20254459306');
+const capability = await client.checkEmissionCapability('20999999999');
 console.log(`Tipos compatibles: ${capability.compatible_types.join(', ')}`);
 console.log(capability.recommendation);
 
 // Emitir factura
 const invoice = await client.emitInvoice({
-  cuit_emisor: '20254459306',
+  cuit_emisor: '20999999999',
   punto_de_venta: 1,
   tipo_comprobante: 'B',
   receptor: { tipo_doc: 'CUIT', nro_doc: '20333444555' },
@@ -54,7 +54,7 @@ Por defecto `conceptos[].precio` se envía con IVA incluido. Si tu sistema manej
 
 ```typescript
 const invoice = await client.emitInvoice({
-  cuit_emisor: '20254459306',
+  cuit_emisor: '20999999999',
   punto_de_venta: 1,
   tipo_comprobante: 'A',
   iva_incluido: false, // conceptos[].precio son netos
@@ -70,7 +70,7 @@ Los datos del emisor que se imprimen en el PDF (razón social, domicilio, Ingres
 
 ```typescript
 const invoice = await client.emitInvoice({
-  cuit_emisor: '20254459306',
+  cuit_emisor: '20999999999',
   punto_de_venta: 1,
   tipo_comprobante: 'B',
   emisor_razon_social: 'Mi Empresa S.A.',
@@ -91,7 +91,7 @@ Sin certificados, sin llaves privadas. En minutos facturás.
 
 ```typescript
 const delegation = await client.createDelegation({
-  cuit: '20254459306',
+  cuit: '20999999999',
   organization: 'Tu Empresa'
 });
 ```
@@ -101,7 +101,7 @@ Generación segura de claves RSA y CSR.
 
 ```typescript
 const credential = await client.createCredential({
-  cuit: '20254459306',
+  cuit: '20999999999',
   organization: 'Tu Empresa'
 });
 ```
@@ -111,7 +111,7 @@ Subida directa de certificados (.crt) y llaves (.key).
 
 ```typescript
 await client.importCredential({
-  cuit: '20254459306',
+  cuit: '20999999999',
   organization: 'Tu Empresa',
   certificate: certificatePem,
   private_key: privateKeyPem

@@ -1,6 +1,6 @@
 {
   "name": "keycae-ts",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Official TypeScript & JavaScript SDK client for KeyCAE.ar impositive compliance API (ARCA)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
