@@ -1,6 +1,6 @@
 {
   "name": "keycae-mcp",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "mcpName": "io.github.AMKRS3/keycae",
   "description": "MCP Server for KeyCAE - Argentine electronic invoicing (factura electrónica) with ARCA/AFIP. 12 tools for AI agents.",
   "type": "module",
@@ -20,7 +20,16 @@
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
   },
-  "keywords": ["mcp", "arca", "afip", "factura-electronica", "argentina", "invoicing", "cae", "ai-agent"],
+  "keywords": [
+    "mcp",
+    "arca",
+    "afip",
+    "factura-electronica",
+    "argentina",
+    "invoicing",
+    "cae",
+    "ai-agent"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
