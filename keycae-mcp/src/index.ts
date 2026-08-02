@@ -459,16 +459,19 @@ server.resource(
 - Punto de venta must be registered for electronic invoicing
 - Error 10016 (duplicated) is handled automatically — CAE is recovered
 
-## B2B2C (Platform Plan)
-- POST /v1/api-keys → Create sub-accounts programmatically
-- Webhooks: POST /v1/webhooks/config to receive invoice events
+## Webhooks
+- POST /v1/webhooks/config to receive invoice events
 - Rate limit: 100 req/min per API key
+
+## Multi-CUIT / Reselling
+- Each account is bound to a single CUIT — cross-CUIT invoice emission is blocked.
+- Reselling invoicing to your own end clients (multiple CUITs under one integration) is exclusive to the Partner Program — contact KeyCAE, not self-serve.
 
 ## Pricing
 - Sandbox: Free & Unlimited (Testing environment, CUIT 20999999999)
 - Free: 50 invoices/month (Production environment)
 - Developer: 1,000 invoices/month ($9,900 ARS)
-- Platform: Unlimited ($59,000 ARS)
+- Unlimited: no monthly cap ($59,000 ARS)
 `
     }]
   })
