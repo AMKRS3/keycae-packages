@@ -84,7 +84,8 @@ server.tool(
       descripcion: z.string().describe("Item description"),
       precio: z.number().describe("Unit price in ARS"),
       cantidad: z.number().optional().default(1),
-      alicuota_iva: z.number().optional().default(21).describe("IVA rate: 21, 10.5, 27, 5, 2, 0")
+      alicuota_iva: z.number().optional().default(21).describe("IVA rate: 21, 10.5, 27, 5, 2, 0"),
+      codigo: z.string().optional().describe("Internal product code / SKU. Printed in its own column before the description on the A4 PDF, and as a '[code]' prefix on the 80mm ticket.")
     })).describe("Line items"),
     tributos: z.array(z.object({
       id: z.number().describe("Tax code: 9=IIBB, 12=IIBB CABA, 13=IIBB BSAS, 14=IIBB Santa Fe, 5=Impuesto Interno, 1=Ganancias"),

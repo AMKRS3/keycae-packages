@@ -35,6 +35,9 @@ export interface InvoiceItem {
   precio: number;
   cantidad?: number;
   alicuota_iva?: number;
+  /** Código interno / SKU del producto. Se imprime en su propia columna antes de la
+   * descripción en el PDF A4, y como prefijo "[código]" en el ticket 80mm. */
+  codigo?: string;
 }
 
 export interface Tributo {
