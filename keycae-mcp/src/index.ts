@@ -454,7 +454,7 @@ server.resource(
 
 ## ARCA/AFIP Notes
 - CUIT must delegate electronic invoicing to KeyCAE's representative CUIT
-- Delegation is automatic if Hermes is enabled
+- Delegation is automatic if Hermes is enabled — no manual ARCA steps needed, typically resolved within minutes
 - Certificates must be renewed annually
 - Punto de venta must be registered for electronic invoicing
 - Error 10016 (duplicated) is handled automatically — CAE is recovered
