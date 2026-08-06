@@ -82,7 +82,11 @@ server.tool(
     }).describe("Invoice recipient"),
     conceptos: z.array(z.object({
       descripcion: z.string().describe("Item description"),
-      precio: z.number().describe("Unit price in ARS"),
+      precio: z.number().describe("Unit price in ARS (final price with VAT included unless iva_incluido:false)"),
+      precio_original: z.number().optional().describe("Original unit list price before discount"),
+      descuento: z.union([z.number(), z.string()]).optional().describe("Discount amount ($) or percentage string (e.g. '15%')"),
+      descuento_monto: z.number().optional().describe("Absolute discount amount in ARS"),
+      descuento_porcentaje: z.number().optional().describe("Discount percentage (1 to 100)"),
       cantidad: z.number().optional().default(1),
       alicuota_iva: z.number().optional().default(21).describe("IVA rate: 21, 10.5, 27, 5, 2, 0"),
       codigo: z.string().optional().describe("Internal product code / SKU. Printed in its own column before the description on the A4 PDF, and as a '[code]' prefix on the 80mm ticket.")

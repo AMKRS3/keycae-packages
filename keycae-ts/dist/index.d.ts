@@ -24,8 +24,19 @@ export interface InvoiceReceptor {
 export interface InvoiceItem {
     descripcion: string;
     precio: number;
+    /** Precio unitario de lista / original sin descuento. */
+    precio_original?: number;
+    /** Descuento aplicado en monto ($) o porcentaje (ej: "15%"). */
+    descuento?: number | string;
+    /** Monto absoluto en Pesos del descuento en el producto. */
+    descuento_monto?: number;
+    /** Porcentaje de descuento aplicado al producto (1 a 100). */
+    descuento_porcentaje?: number;
     cantidad?: number;
     alicuota_iva?: number;
+    /** Código interno / SKU del producto. Se imprime en su propia columna antes de la
+     * descripción en el PDF A4, y como prefijo "[código]" en el ticket 80mm. */
+    codigo?: string;
 }
 export interface Tributo {
     id: number;
