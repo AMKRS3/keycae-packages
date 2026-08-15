@@ -1,6 +1,6 @@
 {
   "name": "keycae-mcp",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "mcpName": "io.github.AMKRS3/keycae",
   "description": "MCP Server for KeyCAE - Argentine electronic invoicing (factura electrónica) with ARCA/AFIP. 12 tools for AI agents.",
   "type": "module",
