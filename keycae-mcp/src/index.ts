@@ -18,6 +18,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
 // ── Config ──────────────────────────────────────────────────────────
@@ -30,12 +31,16 @@ if (!API_KEY) {
 }
 
 // ── HTTP Client ─────────────────────────────────────────────────────
-async function api(method: string, path: string, body?: unknown): Promise<any> {
+async function api(method: string, path: string, body?: unknown, idempotencyKey?: string): Promise<any> {
   const url = `${BASE_URL}${path}`;
   const headers: Record<string, string> = {
     "Authorization": `Bearer ${API_KEY}`,
     "Content-Type": "application/json"
   };
+
+  if (idempotencyKey) {
+    headers["Idempotency-Key"] = idempotencyKey;
+  }
 
   const res = await fetch(url, {
     method,
@@ -120,10 +125,15 @@ server.tool(
     emisor_razon_social: z.string().optional().describe("Issuer business name printed on the PDF header. Per-invoice override, no account needed; takes precedence over account branding."),
     emisor_direccion: z.string().optional().describe("Issuer fiscal address printed on the PDF (per-invoice override)."),
     emisor_ingresos_brutos: z.string().optional().describe("Issuer Ingresos Brutos number printed on the PDF (per-invoice override, no account needed)."),
-    emisor_inicio_actividades: z.string().optional().describe("Issuer activity start date printed on the PDF, DD/MM/YYYY (per-invoice override).")
+    emisor_inicio_actividades: z.string().optional().describe("Issuer activity start date printed on the PDF, DD/MM/YYYY (per-invoice override)."),
+    idempotency_key: z.string().optional().describe("Stable key identifying THIS invoice, so a retry returns the original one instead of emitting a duplicate at ARCA. Derive it from the operation being invoiced (e.g. 'order_10482_v1'), not at random. Required in production: if omitted a random UUID is sent, which keeps the call working but gives no protection against a retry.")
   },
   async (args) => {
-    const result = await api("POST", "/v1/invoices", args);
+    // El servidor exige Idempotency-Key en producción. Se manda siempre: la
+    // clave provista por el agente si la hay, y si no un UUID, para que la
+    // emisión no falle con 400 por un header ausente.
+    const { idempotency_key, ...invoice } = args;
+    const result = await api("POST", "/v1/invoices", invoice, idempotency_key || randomUUID());
     const tipo = args.tipo_comprobante || 'C';
     return {
       content: [{

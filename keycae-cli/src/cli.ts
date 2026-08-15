@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import inquirer from 'inquirer';
 import fetch from 'node-fetch';
+import { randomUUID } from 'node:crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -28,7 +29,7 @@ function saveConfig(config: CliConfig) {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
 }
 
-async function apiRequest(method: string, path: string, body?: any): Promise<any> {
+async function apiRequest(method: string, path: string, body?: any, idempotencyKey?: string): Promise<any> {
   const config = loadConfig();
   if (!config.apiKey) {
     console.error('❌ API Key no configurada. Ejecutá primero `keycae init`.');
@@ -39,6 +40,10 @@ async function apiRequest(method: string, path: string, body?: any): Promise<any
     'Authorization': `Bearer ${config.apiKey}`,
     'Content-Type': 'application/json',
   };
+
+  if (idempotencyKey) {
+    headers['Idempotency-Key'] = idempotencyKey;
+  }
 
   const res = await fetch(`${config.baseUrl}${path}`, {
     method,
@@ -191,7 +196,7 @@ program
         },
         conceptos: [{ descripcion: answers.descripcion, precio: parseFloat(answers.precio) }],
         ...(cbtes_asociados ? { cbtes_asociados } : {})
-      });
+      }, randomUUID()); // Obligatorio en producción: sin este header la emisión falla con 400
 
       console.log('\n✅ --- COMPROBANTE AUTORIZADO ---');
       console.log(`📄 Nro: ${answers.tipo}-0001-${data.numero_factura.toString().padStart(8, '0')}`);

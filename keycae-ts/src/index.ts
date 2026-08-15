@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { randomUUID } from 'node:crypto';
 
 // ════════════════════════════════════════════════════════════════════
 //  INTERFACES
@@ -411,9 +412,18 @@ export class KeyCaeClient {
 
   /**
    * Emitir Factura Electrónica Homologada (CAE)
+   *
+   * `idempotencyKey` identifica ESTA factura: si el request se reintenta, la
+   * API devuelve la factura original en lugar de emitir un duplicado ante
+   * ARCA. Derivala de la operación que estás facturando (por ejemplo
+   * `order_10482_v1`), no al azar.
+   *
+   * En producción el header es obligatorio. Si no la pasás se manda un UUID,
+   * de modo que la llamada funciona igual, pero un reintento emitiría una
+   * segunda factura: la protección real requiere una clave estable.
    */
   async emitInvoice(data: InvoiceInput, idempotencyKey?: string): Promise<InvoiceResponse> {
-    return this.request<InvoiceResponse>('POST', '/v1/invoices', data, idempotencyKey);
+    return this.request<InvoiceResponse>('POST', '/v1/invoices', data, idempotencyKey || randomUUID());
   }
 
   /**
