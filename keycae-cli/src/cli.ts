@@ -361,7 +361,7 @@ program
       }
       console.log(`\n📍 ${data.length} punto(s) de venta:\n`);
       for (const p of data) {
-        console.log(`  #${p.numero}  |  ${p.tipoEmision}  |  ${p.tipoAutomatizacion || '-'}`);
+        console.log(`  #${p.number}  |  ${p.type}  |  ${p.status}`);
       }
       console.log();
     } catch (error: any) {

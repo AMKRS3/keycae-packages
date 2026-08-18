@@ -68,6 +68,10 @@ export interface CondicionesIvaResponse {
 
 export interface InvoiceInput {
   cuit_emisor: string;
+  /**
+   * Punto de venta habilitado en ARCA para Web Services (tipo RECE).
+   * Debe estar entre 1 y 9998; fuera de ese rango ARCA rechaza con el error 10004.
+   */
   punto_de_venta: number;
   tipo_comprobante: 'A' | 'B' | 'C' | 'M' | 'E'
     | 'NCA' | 'NCB' | 'NCC' | 'NCE' | 'NCM'
@@ -190,11 +194,18 @@ export interface KmsImportInput {
 }
 
 export interface PuntoDeVenta {
-  numero: number;
-  tipoEmision: string;
-  tipoAutomatizacion?: string;
-  fechaServicioDesde?: string;
-  fechaServicioHasta?: string;
+  id: number;
+  /** Número de punto de venta: es el valor que va en `punto_de_venta` al emitir. */
+  number: number;
+  name: string;
+  /** Tipo de emisión declarado en ARCA (CAE, CAEA, …). */
+  type: string;
+  status: 'activo' | 'inactivo';
+  /** Bloqueado en ARCA. No viene en sandbox. */
+  blocked?: boolean;
+  /** Fecha de baja (YYYYMMDD) o null si sigue vigente. No viene en sandbox. */
+  fecha_baja?: string | null;
+  cuit: string;
 }
 
 export interface EmissionCapability {
@@ -262,6 +273,8 @@ export interface PartnerPublicConfig {
   logo_url: string;
   brand_color: string;
   billing_mode: 'decentralized' | 'consolidated';
+  /** Si es `false`, no se debe aplicar el logo ni el color del partner. */
+  co_branding_enabled?: boolean;
 }
 
 // ════════════════════════════════════════════════════════════════════
