@@ -155,6 +155,32 @@ class KeyCaeClient {
         return this.request('GET', `/v1/invoices?${params}`);
     }
     /**
+     * Reporte Mensual de Ventas (para el contador).
+     *
+     * Devuelve el resumen del período agrupado por tipo (A/B/C, Notas de Crédito
+     * y Débito) y por alícuota, más el detalle por comprobante. Las Notas de
+     * Crédito restan y las de Débito suman.
+     */
+    async getSalesReport(from, to) {
+        const params = new URLSearchParams({ from, to });
+        return this.request('GET', `/v1/invoices/report?${params}`);
+    }
+    /**
+     * Reporte Mensual de Ventas en CSV (string listo para Excel es-AR:
+     * separador ';', decimales con coma, BOM UTF-8).
+     */
+    async getSalesReportCsv(from, to) {
+        const params = new URLSearchParams({ from, to, format: 'csv' });
+        const response = await (0, node_fetch_1.default)(`${this.baseUrl}/v1/invoices/report?${params}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${this.apiKey}` }
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to fetch sales report CSV (${response.status})`);
+        }
+        return response.text();
+    }
+    /**
      * Descargar PDF de Factura (Retorna el Stream / ArrayBuffer)
      */
     async getInvoicePdfBuffer(id, options) {

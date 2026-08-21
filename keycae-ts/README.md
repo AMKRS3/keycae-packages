@@ -147,6 +147,8 @@ await client.importCredential({
 | `emitInvoice(data, idempotencyKey?)` | Emitir factura electrónica (CAE) |
 | `getInvoice(id)` | Obtener detalles de factura |
 | `listInvoices(limit?, offset?)` | Listar facturas recientes |
+| `getSalesReport(from, to)` | Reporte mensual de ventas para el contador (JSON) |
+| `getSalesReportCsv(from, to)` | Reporte mensual en CSV (listo para Excel) |
 | `getInvoicePdfBuffer(id)` | Descargar PDF de factura |
 
 ### Puntos de Venta

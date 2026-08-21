@@ -118,6 +118,46 @@ export interface InvoiceInput {
   }[];
 }
 
+export interface SalesReport {
+  cuit_emisor: string;
+  razon_social: string;
+  periodo: { from: string | null; to: string | null };
+  resumen: {
+    totales: {
+      cantidad_comprobantes: number;
+      neto_gravado: number;
+      iva: number;
+      exento_no_gravado: number;
+      otros_tributos: number;
+      total_facturado: number;
+    };
+    por_tipo: Array<{
+      tipo: string;
+      cantidad: number;
+      neto_gravado: number;
+      iva: number;
+      exento_no_gravado: number;
+      otros_tributos: number;
+      total: number;
+    }>;
+    por_alicuota: Array<{ alicuota: number; neto_gravado: number; iva: number }>;
+  };
+  comprobantes: Array<{
+    fecha: string;
+    tipo: string;
+    comprobante: string;
+    cae: string;
+    receptor: string;
+    receptor_doc: string;
+    receptor_condicion_iva: string;
+    neto_gravado: number;
+    iva: number;
+    exento: number;
+    otros_tributos: number;
+    total: number;
+  }>;
+}
+
 export interface InvoiceResponse {
   id: string;
   cuit_emisor: string;
@@ -452,6 +492,34 @@ export class KeyCaeClient {
   async listInvoices(limit: number = 10, offset: number = 0): Promise<{ invoices: InvoiceResponse[]; total: number }> {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
     return this.request<any>('GET', `/v1/invoices?${params}`);
+  }
+
+  /**
+   * Reporte Mensual de Ventas (para el contador).
+   *
+   * Devuelve el resumen del período agrupado por tipo (A/B/C, Notas de Crédito
+   * y Débito) y por alícuota, más el detalle por comprobante. Las Notas de
+   * Crédito restan y las de Débito suman.
+   */
+  async getSalesReport(from: string, to: string): Promise<SalesReport> {
+    const params = new URLSearchParams({ from, to });
+    return this.request<SalesReport>('GET', `/v1/invoices/report?${params}`);
+  }
+
+  /**
+   * Reporte Mensual de Ventas en CSV (string listo para Excel es-AR:
+   * separador ';', decimales con coma, BOM UTF-8).
+   */
+  async getSalesReportCsv(from: string, to: string): Promise<string> {
+    const params = new URLSearchParams({ from, to, format: 'csv' });
+    const response = await fetch(`${this.baseUrl}/v1/invoices/report?${params}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sales report CSV (${response.status})`);
+    }
+    return response.text();
   }
 
   /**

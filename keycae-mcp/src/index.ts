@@ -193,6 +193,26 @@ server.tool(
   }
 );
 
+// 3b. SALES REPORT ───────────────────────────────────────────────────
+server.tool(
+  "get_sales_report",
+  "Monthly sales report for the accountant: period totals aggregated by comprobante type (A/B/C, Credit/Debit Notes) and by VAT rate (neto gravado, IVA, exento, total), plus a per-comprobante detail. Credit Notes subtract and Debit Notes add.",
+  {
+    from: z.string().describe("Start date, YYYY-MM-DD (inclusive)"),
+    to: z.string().describe("End date, YYYY-MM-DD (inclusive)")
+  },
+  async (args) => {
+    const params = new URLSearchParams({ from: args.from, to: args.to });
+    const result = await api("GET", `/v1/invoices/report?${params}`);
+    return {
+      content: [{
+        type: "text" as const,
+        text: JSON.stringify(result, null, 2)
+      }]
+    };
+  }
+);
+
 // 4. LIST CREDENTIALS ────────────────────────────────────────────────
 server.tool(
   "list_credentials",

@@ -101,6 +101,52 @@ export interface InvoiceInput {
         fecha?: string;
     }[];
 }
+export interface SalesReport {
+    cuit_emisor: string;
+    razon_social: string;
+    periodo: {
+        from: string | null;
+        to: string | null;
+    };
+    resumen: {
+        totales: {
+            cantidad_comprobantes: number;
+            neto_gravado: number;
+            iva: number;
+            exento_no_gravado: number;
+            otros_tributos: number;
+            total_facturado: number;
+        };
+        por_tipo: Array<{
+            tipo: string;
+            cantidad: number;
+            neto_gravado: number;
+            iva: number;
+            exento_no_gravado: number;
+            otros_tributos: number;
+            total: number;
+        }>;
+        por_alicuota: Array<{
+            alicuota: number;
+            neto_gravado: number;
+            iva: number;
+        }>;
+    };
+    comprobantes: Array<{
+        fecha: string;
+        tipo: string;
+        comprobante: string;
+        cae: string;
+        receptor: string;
+        receptor_doc: string;
+        receptor_condicion_iva: string;
+        neto_gravado: number;
+        iva: number;
+        exento: number;
+        otros_tributos: number;
+        total: number;
+    }>;
+}
 export interface InvoiceResponse {
     id: string;
     cuit_emisor: string;
@@ -305,6 +351,19 @@ export declare class KeyCaeClient {
         invoices: InvoiceResponse[];
         total: number;
     }>;
+    /**
+     * Reporte Mensual de Ventas (para el contador).
+     *
+     * Devuelve el resumen del período agrupado por tipo (A/B/C, Notas de Crédito
+     * y Débito) y por alícuota, más el detalle por comprobante. Las Notas de
+     * Crédito restan y las de Débito suman.
+     */
+    getSalesReport(from: string, to: string): Promise<SalesReport>;
+    /**
+     * Reporte Mensual de Ventas en CSV (string listo para Excel es-AR:
+     * separador ';', decimales con coma, BOM UTF-8).
+     */
+    getSalesReportCsv(from: string, to: string): Promise<string>;
     /**
      * Descargar PDF de Factura (Retorna el Stream / ArrayBuffer)
      */
