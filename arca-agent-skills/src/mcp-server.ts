@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { randomUUID } from "node:crypto";
 
 // ── Config ──────────────────────────────────────────────────────────
 const API_KEY = process.env.KEYCAE_API_KEY || "";
@@ -12,12 +13,13 @@ if (!API_KEY) {
 }
 
 // ── HTTP Client ─────────────────────────────────────────────────────
-async function api(method: string, path: string, body?: unknown): Promise<any> {
+async function api(method: string, path: string, body?: unknown, idempotencyKey?: string): Promise<any> {
   const url = `${BASE_URL}${path}`;
   const headers: Record<string, string> = {
     "Authorization": `Bearer ${API_KEY}`,
     "Content-Type": "application/json"
   };
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
 
   const res = await fetch(url, {
     method,
@@ -126,10 +128,15 @@ server.tool(
       numero: z.number().describe("Número secuencial del comprobante asociado"),
       cuit: z.string().optional().describe("CUIT del emisor del comprobante asociado en caso de ser distinto"),
       fecha: z.string().optional().describe("Fecha del comprobante asociado (YYYYMMDD)")
-    })).optional().describe("Comprobantes asociados (requerido para notas de crédito/débito)")
+    })).optional().describe("Comprobantes asociados (requerido para notas de crédito/débito)"),
+    email: z.string().email().optional().describe("Destinatario del PDF. Requiere enviar_email:true."),
+    enviar_email: z.boolean().optional().describe("Envía el PDF por correo después de obtener el CAE."),
+    email_respuesta: z.string().email().optional().describe("Correo que recibe la respuesta del destinatario; no cambia el destinatario."),
+    idempotency_key: z.string().optional().describe("Clave estable de la operación para evitar duplicados; en producción es obligatoria.")
   },
   async (args) => {
-    const result = await api("POST", "/v1/invoices", args);
+    const { idempotency_key, ...invoice } = args;
+    const result = await api("POST", "/v1/invoices", invoice, idempotency_key || randomUUID());
     return {
       content: [{
         type: "text" as const,
@@ -140,6 +147,7 @@ server.tool(
           numero_factura: result.numero_factura,
           url_pdf: result.url_pdf,
           url_qr: result.url_qr,
+          email_envio: result.email_envio,
           message: `✅ Factura emitida. CAE: ${result.cae}. PDF: ${result.url_pdf}`
         }, null, 2)
       }]

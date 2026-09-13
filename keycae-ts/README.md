@@ -30,6 +30,9 @@ const client = new KeyCaeClient('sk_test_public_sandbox_cuit_20999999999');
 const taxpayer = await client.getTaxpayer('20999999999');
 console.log(`${taxpayer.nombre} | ${taxpayer.estado}`);
 
+// En producción también expone las inscripciones usadas para determinar el IVA
+console.log(taxpayer.condicion_iva, taxpayer.impuestos);
+
 // Verificar qué tipos de factura puede emitir
 const capability = await client.checkEmissionCapability('20999999999');
 console.log(`Tipos compatibles: ${capability.compatible_types.join(', ')}`);
@@ -47,6 +50,33 @@ const invoice = await client.emitInvoice({
 console.log(`CAE: ${invoice.cae}`);
 console.log(`PDF: ${invoice.url_pdf}`);
 ```
+
+### Enviar el PDF por correo y recibir respuestas
+
+```typescript
+const invoice = await client.emitInvoice({
+  cuit_emisor: '20999999999',
+  punto_de_venta: 1,
+  tipo_comprobante: 'C',
+  receptor: { tipo_doc: 'DNI', nro_doc: '35123456' },
+  conceptos: [{ descripcion: 'Servicios', precio: 15000 }],
+  email: 'cliente@correo.com',
+  enviar_email: true,
+  email_respuesta: 'facturacion@emisor.com'
+}, 'order_10482_v1');
+```
+
+`email` es el destinatario del PDF. `email_respuesta` es el Reply-To: si el destinatario responde, el mensaje llega al emisor. No cambia quién recibe el comprobante.
+
+Para dejar una dirección fija en la cuenta:
+
+```typescript
+await client.saveBrandingSettings({
+  email_respuesta: 'facturacion@emisor.com'
+});
+```
+
+El cliente también puede configurarla en **Dashboard → Personalizar PDF → Correo para respuestas**. La prioridad es: valor enviado en la factura, configuración persistente y correo de acceso a KeyCAE.
 
 ### Precios netos (sin IVA)
 
@@ -150,6 +180,8 @@ await client.importCredential({
 | `getSalesReport(from, to)` | Reporte mensual de ventas para el contador (JSON) |
 | `getSalesReportCsv(from, to)` | Reporte mensual en CSV (listo para Excel) |
 | `getInvoicePdfBuffer(id)` | Descargar PDF de factura |
+| `getBrandingSettings()` | Consultar personalización y correo de respuesta |
+| `saveBrandingSettings(data)` | Guardar personalización y correo de respuesta |
 
 ### Puntos de Venta
 | Método | Descripción |

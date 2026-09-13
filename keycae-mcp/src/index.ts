@@ -126,6 +126,11 @@ server.tool(
     emisor_direccion: z.string().optional().describe("Issuer fiscal address printed on the PDF (per-invoice override)."),
     emisor_ingresos_brutos: z.string().optional().describe("Issuer Ingresos Brutos number printed on the PDF (per-invoice override, no account needed)."),
     emisor_inicio_actividades: z.string().optional().describe("Issuer activity start date printed on the PDF, DD/MM/YYYY (per-invoice override)."),
+    isib_caba_condicion: z.enum(["no_aplica", "general", "simplificado", "exento", "promocion"]).optional().describe("ISIB CABA condition for the Res. 169/AGIP/2026 PDF legend."),
+    isib_caba_alicuota: z.number().min(0).max(100).optional().describe("ISIB CABA rate. Required for general/promocion conditions."),
+    email: z.string().email().optional().describe("Recipient of the authorized PDF. Requires enviar_email:true."),
+    enviar_email: z.boolean().optional().describe("Send the PDF by email after ARCA authorizes the invoice."),
+    email_respuesta: z.string().email().optional().describe("Reply-To for this invoice. Does not change the recipient."),
     idempotency_key: z.string().optional().describe("Stable key identifying THIS invoice, so a retry returns the original one instead of emitting a duplicate at ARCA. Derive it from the operation being invoiced (e.g. 'order_10482_v1'), not at random. Required in production: if omitted a random UUID is sent, which keeps the call working but gives no protection against a retry.")
   },
   async (args) => {
@@ -147,6 +152,7 @@ server.tool(
           tipo_comprobante: tipo,
           url_pdf: result.url_pdf,
           url_qr: result.url_qr,
+          email_envio: result.email_envio,
           vencimiento_cae: result.cae_vencimiento,
           message: `✅ Factura ${tipo} emitida. CAE: ${result.cae}. PDF: ${result.url_pdf} (Añadir ?format=ticket para Ticket 80mm)`
         }, null, 2)

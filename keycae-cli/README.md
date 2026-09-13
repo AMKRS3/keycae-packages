@@ -23,7 +23,7 @@ npm install && npm run build && npm link
 |---------|-------------|
 | `keycae init` | Configurar API Key y servidor |
 | `keycae taxpayers <cuit>` | Consultar CUIT en padrón ARCA |
-| `keycae invoice-emit` | Emitir factura electrónica interactiva |
+| `keycae invoice-emit` | Emitir factura electrónica; acepta `--email` y `--reply-to` |
 | `keycae invoices` | Listar facturas recientes |
 | `keycae invoice <id>` | Ver detalles de una factura |
 | `keycae credentials list` | Listar certificados digitales |
@@ -64,6 +64,14 @@ $ keycae invoices --limit 5
   C-0001-00000142  |  CAE: 76142098471253  |  $120000  |  inv_abc123
   C-0001-00000143  |  CAE: 76294018274615  |  $85000   |  inv_xyz789
 ```
+
+### Emitir y enviar el PDF por correo
+
+```bash
+$ keycae invoice-emit --email cliente@correo.com --reply-to facturacion@emisor.com
+```
+
+`--email` activa el envío del PDF autorizado. `--reply-to` indica dónde llegará una eventual respuesta del destinatario.
 
 ### Ver plan de facturación
 ```bash

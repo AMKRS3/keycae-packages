@@ -88,11 +88,11 @@ Add to `.cursor/mcp.json` in your project:
 }
 ```
 
-## 🛠️ Available Tools (13)
+## 🛠️ Available Tools (15)
 
 | Tool | Description |
 |------|-------------|
-| `emit_invoice` | Emitir factura (24 tipos: A/B/C/M/E + 5 NC + 5 ND + 9 FCE MiPyMEs). Soporta precios netos (`iva_incluido`), tributos, moneda extranjera y datos del emisor por comprobante (`emisor_razon_social`, `emisor_ingresos_brutos`, etc.) |
+| `emit_invoice` | Emitir factura (24 tipos) y opcionalmente enviar el PDF por correo con `email`, `enviar_email` y `email_respuesta`. También soporta precios netos, tributos, moneda extranjera y datos del emisor. |
 | `get_invoice` | Consultar factura por ID |
 | `list_invoices` | Listar facturas recientes |
 | `get_sales_report` | Reporte mensual de ventas para el contador (por tipo y alícuota; NC restan, ND suman) |
@@ -105,6 +105,7 @@ Add to `.cursor/mcp.json` in your project:
 | `get_condiciones_iva` | Tabla de 15 condiciones IVA del receptor (códigos oficiales ARCA) |
 | `get_billing_status` | Estado del plan y consumo |
 | `list_puntos_de_venta` | Listar puntos de venta habilitados |
+| `get_cotizacion` | Consultar cotización de una moneda extranjera contra el peso |
 | `keycae_health` | Health check de la API |
 
 ## 📖 Resources
@@ -120,6 +121,20 @@ The server also exposes a `keycae://docs` resource with inline documentation cov
 4. emit_invoice      → Emitir la factura
 5. get_invoice       → Consultar detalles
 ```
+
+## ✉️ Enviar el comprobante por correo
+
+En `emit_invoice`, usá:
+
+```json
+{
+  "email": "cliente@correo.com",
+  "enviar_email": true,
+  "email_respuesta": "facturacion@emisor.com"
+}
+```
+
+`email_respuesta` es opcional. Si falta, KeyCAE usa el correo configurado por el emisor en **Dashboard → Personalizar PDF → Correo para respuestas** y luego el correo de acceso de su cuenta.
 
 ## 📋 Tipos de Comprobante
 

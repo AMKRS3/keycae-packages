@@ -127,6 +127,8 @@ program
   .command('invoice-emit')
   .description('Emitir factura electrónica')
   .option('--cbtes <comprobantes>', 'Comprobantes asociados (formato: TIPO-POS-NUMERO, separados por comas, ej: C-1-421)')
+  .option('--email <correo>', 'Enviar automáticamente el PDF a este correo')
+  .option('--reply-to <correo>', 'Correo que recibirá la respuesta del destinatario')
   .action(async (options) => {
     const answers = await inquirer.prompt([
       { type: 'input', name: 'cuitEmisor', message: 'CUIT Emisor:', default: '20254459306' },
@@ -195,7 +197,12 @@ program
           nro_doc: answers.cuitReceptor 
         },
         conceptos: [{ descripcion: answers.descripcion, precio: parseFloat(answers.precio) }],
-        ...(cbtes_asociados ? { cbtes_asociados } : {})
+        ...(cbtes_asociados ? { cbtes_asociados } : {}),
+        ...(options.email ? {
+          email: options.email,
+          enviar_email: true,
+          ...(options.replyTo ? { email_respuesta: options.replyTo } : {})
+        } : {})
       }, randomUUID()); // Obligatorio en producción: sin este header la emisión falla con 400
 
       console.log('\n✅ --- COMPROBANTE AUTORIZADO ---');

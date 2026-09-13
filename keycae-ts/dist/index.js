@@ -226,6 +226,13 @@ class KeyCaeClient {
     async saveTelegramSettings(data) {
         return this.request('POST', '/v1/settings/telegram', data);
     }
+    // ── Personalización de PDF y correo de respuesta ───────────────
+    async getBrandingSettings() {
+        return this.request('GET', '/v1/settings/branding');
+    }
+    async saveBrandingSettings(data) {
+        return this.request('POST', '/v1/settings/branding', data);
+    }
     // ── Health ────────────────────────────────────────────────────────
     /**
      * Health Check de la API

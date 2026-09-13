@@ -13,6 +13,7 @@ El archivo `SKILL.md` contiene el prompt maestro que le enseña a tu agente sobr
 - Delegación Directa (Zero-Certificate).
 - Prevención de duplicados con `Idempotency-Key`.
 - Auto-sanación con `ai_action_hint`.
+- Envío del PDF por correo y Reply-To configurable por emisor o por comprobante.
 
 Simplemente copia su contenido dentro de tus archivos `.cursorrules` o equivalente.
 

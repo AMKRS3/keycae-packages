@@ -84,7 +84,10 @@ const invoiceData = {
   },
   conceptos: [
     { descripcion: 'Licencia Premium SaaS', precio: 9900.00, cantidad: 1, alicuota_iva: 21 }
-  ]
+  ],
+  email: 'cliente@correo.com',
+  enviar_email: true,
+  email_respuesta: 'facturacion@emisor.com'
 };
 
 try {
@@ -95,6 +98,8 @@ try {
   console.error("Error:", error.message);
 }
 ```
+
+`email` recibe el PDF y `email_respuesta` recibe una eventual contestación. Si el Reply-To no se envía, KeyCAE usa el configurado en Dashboard → Personalizar PDF y luego el correo de acceso de la cuenta.
 
 ### 5. Listing Recent Invoices
 ```typescript

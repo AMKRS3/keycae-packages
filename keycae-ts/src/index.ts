@@ -10,6 +10,14 @@ export interface DomicilioFiscal {
   localidad: string | null;
   cod_postal: string | null;
   provincia: string | null;
+  /** Referencia adicional informada por ARCA, por ejemplo "LOCAL DE BAZAR". */
+  dato_adicional?: string | null;
+}
+
+export interface TaxpayerTax {
+  id: number;
+  descripcion: string | null;
+  estado: string | null;
 }
 
 export interface TaxpayerResponse {
@@ -22,6 +30,8 @@ export interface TaxpayerResponse {
   condicion_iva?: string;
   actividades?: string[];
   domicilio_fiscal?: DomicilioFiscal;
+  /** Inscripciones devueltas por ARCA que permiten auditar la condición de IVA. */
+  impuestos?: TaxpayerTax[];
 }
 
 export interface InvoiceReceptor {
@@ -109,6 +119,15 @@ export interface InvoiceInput {
   emisor_direccion?: string;
   emisor_ingresos_brutos?: string;
   emisor_inicio_actividades?: string;
+  /** Condición y alícuota para la leyenda ISIB CABA (Res. 169/AGIP/2026). */
+  isib_caba_condicion?: 'no_aplica' | 'general' | 'simplificado' | 'exento' | 'promocion';
+  isib_caba_alicuota?: number;
+  /** Destinatario del PDF. Requiere enviar_email:true para disparar el envío. */
+  email?: string;
+  /** Encola el PDF por correo después de que ARCA autoriza el comprobante. */
+  enviar_email?: boolean;
+  /** Reply-To opcional por comprobante; no cambia el destinatario. */
+  email_respuesta?: string;
   cbtes_asociados?: {
     tipo: string | number;
     punto_de_venta: number;
@@ -169,6 +188,25 @@ export interface InvoiceResponse {
   url_pdf: string;
   url_qr: string;
   total: number;
+  email_envio?: {
+    solicitado: boolean;
+    estado: 'encolado' | 'no_encolado';
+    destinatario: string;
+    mensaje?: string;
+  };
+}
+
+export interface BrandingSettings {
+  brand_logo_url?: string;
+  brand_color?: string;
+  razon_social?: string;
+  domicilio_fiscal?: string;
+  ingresos_brutos?: string;
+  inicio_actividades?: string;
+  email_respuesta?: string;
+  isib_caba_condicion?: 'no_aplica' | 'general' | 'simplificado' | 'exento' | 'promocion';
+  isib_caba_alicuota?: number;
+  isib_caba_convenio_multilateral?: boolean;
 }
 
 export interface BillingStatusResponse {
@@ -576,6 +614,16 @@ export class KeyCaeClient {
    */
   async saveTelegramSettings(data: TelegramSettingsInput): Promise<any> {
     return this.request<any>('POST', '/v1/settings/telegram', data);
+  }
+
+  // ── Personalización de PDF y correo de respuesta ───────────────
+
+  async getBrandingSettings(): Promise<BrandingSettings> {
+    return this.request<BrandingSettings>('GET', '/v1/settings/branding');
+  }
+
+  async saveBrandingSettings(data: BrandingSettings): Promise<{ success: boolean; message: string }> {
+    return this.request<{ success: boolean; message: string }>('POST', '/v1/settings/branding', data);
   }
 
   // ── Health ────────────────────────────────────────────────────────

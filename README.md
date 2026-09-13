@@ -10,8 +10,8 @@ Diseñado para developers humanos y **agentes autónomos de IA** (Cursor, Windsu
 
 | Paquete | Directorio | Descripción | npm |
 |---------|------------|-------------|-----|
-| **`keycae-ts`** | [`/keycae-ts`](./keycae-ts) | SDK oficial TypeScript/JavaScript (20 métodos, incluye API de Partners) | [![npm](https://img.shields.io/npm/v/keycae-ts)](https://www.npmjs.com/package/keycae-ts) |
-| **`keycae-mcp`** | [`/keycae-mcp`](./keycae-mcp) | MCP Server para AI agents (12 tools) | [![npm](https://img.shields.io/npm/v/keycae-mcp)](https://www.npmjs.com/package/keycae-mcp) |
+| **`keycae-ts`** | [`/keycae-ts`](./keycae-ts) | SDK oficial TypeScript/JavaScript tipado, incluye API de Partners y envío por correo | [![npm](https://img.shields.io/npm/v/keycae-ts)](https://www.npmjs.com/package/keycae-ts) |
+| **`keycae-mcp`** | [`/keycae-mcp`](./keycae-mcp) | MCP Server para AI agents (15 tools) | [![npm](https://img.shields.io/npm/v/keycae-mcp)](https://www.npmjs.com/package/keycae-mcp) |
 | **`keycae-cli`** | [`/keycae-cli`](./keycae-cli) | CLI interactiva de terminal (12 comandos) | [![npm](https://img.shields.io/npm/v/keycae-cli)](https://www.npmjs.com/package/keycae-cli) |
 | **`arca-agent-skills`** | [`/arca-agent-skills`](./arca-agent-skills) | MCP Server + System prompts para agentes IA (12 tools) | — |
 | **`vibe-invoice-inbox`** | [`/vibe-invoice-inbox`](./vibe-invoice-inbox) | Dashboard web de facturas (Next.js) | — |
@@ -45,21 +45,24 @@ Puedes usar la clave de sandbox pública para probar de inmediato:
 ```
 *(Nota: Para producción, reemplázalo por tu clave real `sk_live_...` obtenida al registrarte en [keycae.ar](https://keycae.ar))*
 
-### Tools Disponibles (12)
+### Tools Disponibles (15)
 
 | Tool | Descripción |
 |------|-------------|
-| `emit_invoice` | Emitir factura (24 tipos: A/B/C/M/E + 5 NC + 5 ND + 9 FCE MiPyMEs) |
+| `emit_invoice` | Emitir factura (24 tipos) y enviar opcionalmente el PDF por correo con Reply-To configurable |
 | `get_invoice` | Consultar factura por ID |
 | `list_invoices` | Listar facturas recientes |
+| `get_sales_report` | Reporte mensual de ventas para el contador |
 | `list_credentials` | Ver certificados digitales |
 | `create_credential` | Generar keypair + CSR para ARCA |
 | `check_delegation` | Verificar delegación ARCA |
 | `request_delegation` | Solicitar delegación ARCA |
 | `lookup_taxpayer` | Buscar contribuyente por CUIT |
 | `check_emission_capability` | Verificar tipos de factura compatibles |
+| `get_condiciones_iva` | Consultar las 15 condiciones IVA oficiales |
 | `get_billing_status` | Estado del plan y consumo |
 | `list_puntos_de_venta` | Listar puntos de venta habilitados |
+| `get_cotizacion` | Consultar cotización de moneda extranjera |
 | `keycae_health` | Health check |
 
 ---
