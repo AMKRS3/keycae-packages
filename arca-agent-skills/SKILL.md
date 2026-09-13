@@ -101,6 +101,8 @@ try {
 
 `email` recibe el PDF y `email_respuesta` recibe una eventual contestación. Si el Reply-To no se envía, KeyCAE usa el configurado en Dashboard → Personalizar PDF y luego el correo de acceso de la cuenta.
 
+El destinatario ve la razón social del comercio emisor como nombre del remitente sobre la dirección técnica verificada de KeyCAE (`Comercio S.A. <comprobantes@keycae.ar>`).
+
 ### 5. Listing Recent Invoices
 ```typescript
 const { invoices } = await client.listInvoices(10, 0);

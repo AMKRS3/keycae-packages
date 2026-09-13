@@ -68,6 +68,8 @@ const invoice = await client.emitInvoice({
 
 `email` es el destinatario del PDF. `email_respuesta` es el Reply-To: si el destinatario responde, el mensaje llega al emisor. No cambia quién recibe el comprobante.
 
+El nombre visible del remitente es la razón social del comercio emisor, mientras que la dirección técnica permanece bajo el dominio verificado de KeyCAE, por ejemplo `OSOBIG MARKET S.A.S <comprobantes@keycae.ar>`.
+
 Para dejar una dirección fija en la cuenta:
 
 ```typescript

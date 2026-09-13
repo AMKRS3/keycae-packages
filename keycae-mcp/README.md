@@ -136,6 +136,8 @@ En `emit_invoice`, usá:
 
 `email_respuesta` es opcional. Si falta, KeyCAE usa el correo configurado por el emisor en **Dashboard → Personalizar PDF → Correo para respuestas** y luego el correo de acceso de su cuenta.
 
+El destinatario ve la razón social del comercio como nombre del remitente sobre la dirección técnica verificada de KeyCAE, por ejemplo `OSOBIG MARKET S.A.S <comprobantes@keycae.ar>`.
+
 ## 📋 Tipos de Comprobante
 
 | Tipo | Descripción | Quién emite |
